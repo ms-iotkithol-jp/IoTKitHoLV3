@@ -1,0 +1,1 @@
+C:\Users\hirosho\Documents\GitHub\IoTKitHoLV3\RPi2FHIoTHubApp\RPi2FHIoTHubApp\RPi2FHIoTHubApp.csproj;x86
