@@ -63,7 +63,6 @@
     <Reference Include="Microsoft.SPOT.Net.Security" />
     <Reference Include="Microsoft.SPOT.Time" />
     <Reference Include="Microsoft.SPOT.TinyCore" />
-    <Reference Include="NetMFAMS43, Version=1.0.0.0, Culture=neutral, processorArchitecture=MSIL" />
     <Reference Include="System" />
     <Reference Include="System.Http" />
     <Reference Include="System.IO" />
