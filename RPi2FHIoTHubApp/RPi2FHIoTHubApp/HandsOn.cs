@@ -1,5 +1,5 @@
 ﻿//#define ACCESS_MOBILE_SERVICE
-#define ACCESS_IOT_HUB
+//#define ACCESS_IOT_HUB
 using System;
 using System.Collections.Generic;
 using System.Diagnostics;
