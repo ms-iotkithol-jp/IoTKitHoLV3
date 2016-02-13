@@ -88,6 +88,7 @@ namespace PinKitIoTHubApp
             lock (this)
             {
                 content = Json.NETMF.JsonSerializer.SerializeObject(sensorReadings);
+                sensorReadings.Clear();
             }
             try
             {
