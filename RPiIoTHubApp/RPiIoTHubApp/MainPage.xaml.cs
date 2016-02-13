@@ -1,9 +1,6 @@
-﻿#define ACCESS_MOBILE_SERVICE
-#define ACCESS_IOT_HUB
+﻿//#define ACCESS_MOBILE_SERVICE
+//#define ACCESS_IOT_HUB
 using IoTDevice;
-using Microsoft.Azure.Devices.Client;
-using Microsoft.WindowsAzure.MobileServices;
-using Newtonsoft.Json;
 using System;
 using System.Collections.Generic;
 using System.Diagnostics;
@@ -27,14 +24,20 @@ using Windows.Web.Http;
 
 namespace RPiIoTHubApp
 {
+#if (ACCESS_MOBILE_SERVICE)
+    using Microsoft.WindowsAzure.MobileServices;
+#endif
+#if (ACCESS_IOT_HUB)
+    using Microsoft.Azure.Devices.Client;
+    using Newtonsoft.Json;
+#endif
     /// <summary>
     /// それ自体で使用できる空白ページまたはフレーム内に移動できる空白ページ。
     /// </summary>
     public sealed partial class MainPage : Page
     {
         // Device Entry Configuration
-        string DeviceEntryEndPoint = "http://[mobile service name].azure-mobile.net/";
-        string MobileServiceApplicationKey = "[mobile service access key]";
+        string DeviceEntryEndPoint = "http://[MobileAppName].azurewebsites.net";
 
         // Identifier of this board. this value will be set by this app.
         Guid deviceId = new Guid(/* Your Guid */);
@@ -199,6 +202,8 @@ namespace RPiIoTHubApp
                 };
                 await table.InsertAsync(entry);
             }
+#else
+            IoTServiceAvailabled = true;
 #endif
         }
 #if (ACCESS_IOT_HUB)
