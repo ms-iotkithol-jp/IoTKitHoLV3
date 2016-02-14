@@ -81,15 +81,25 @@ namespace PinKitIoTHubApp
         int counter = 0;
         void Upload()
         {
-            Debug.Print("Sending messages of " + sensorReadings.Count + " to IoT Hub..." + DateTime.Now.Ticks);
+            Debug.Print("Sending message of " + srCount + " to IoT Hub..." + DateTime.Now.Ticks);
 #if (ACCESS_IOT_HUB)
 
             string content = "";
             lock (this)
             {
-                content = Json.NETMF.JsonSerializer.SerializeObject(sensorReadings);
-                sensorReadings.Clear();
+                for (int i = 0; i < srCount; i++)
+                {
+                    var srjson = Json.NETMF.JsonSerializer.SerializeObject(sensorReadings[i]);
+                    if (i > 0)
+                    {
+                        content += ",";
+                    }
+                    content += srjson;
+                    sensorReadings[i] = null;
+                }
+                srCount = 0;
             }
+            content = "[" + content + "]";
             try
             {
                 var message = new Message(System.Text.UTF8Encoding.UTF8.GetBytes(content));
@@ -141,6 +151,8 @@ namespace PinKitIoTHubApp
 
             lock (this)
             {
+                if (srCount < srMax)
+                {
                     var now = DateTime.Now;
                     var accel = pinkit.Accelerometer.TakeMeasurements();
                     var sensorReading = new PinKitIoTApp.Models.SensorReading()
@@ -157,7 +169,8 @@ namespace PinKitIoTHubApp
                     };
                     Debug.Print("Accelerometer:X=" + accel.X.ToString() + ",Y=" + accel.Y.ToString() + ",Z=" + accel.Z.ToString());
                     Debug.Print("Temperature:" + sensorReading.temp.ToString());
-                    sensorReadings.Add(sensorReading);
+                    sensorReadings[srCount++] = sensorReading;
+                }
             }
             measureTimer.Start();
         }
@@ -215,7 +228,9 @@ namespace PinKitIoTHubApp
 #endif
             if (IoTServiceAvailabled)
             {
-                sensorReadings = new ArrayList();
+                srMax = (int)(uploadIntervalMSec / measureIntervalMSec);
+                sensorReadings = new PinKitIoTApp.Models.SensorReading[srMax];
+                srCount = 0;
             }
         }
 
@@ -223,7 +238,9 @@ namespace PinKitIoTHubApp
         DeviceClient deviceClient;
 #endif
         string iotHubConnectionString = "";
-        ArrayList sensorReadings;
+        PinKitIoTApp.Models.SensorReading[] sensorReadings;
+        int srMax;
+        int srCount;
 
         private void SetupIoTHub()
         {
@@ -290,6 +307,7 @@ namespace PinKitIoTHubApp
                     {
                         Debug.Print("Receive Error - " + ex.Message);
                         BlinkPinKitLED(PinKit.BoardFullColorLED.Colors.Yellow, 1000, 500, 5);
+                        break;
                     }
                 }
             }).Start();
