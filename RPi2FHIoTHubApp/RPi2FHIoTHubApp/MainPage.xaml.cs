@@ -37,7 +37,7 @@ namespace RPi2FHIoTHubApp
 
         private async void MainPage_Loaded(object sender, RoutedEventArgs e)
         {
-            if (Guid.Empty == deviceID)
+            if (Guid.Empty == MSIoTKiTHoLJP.IoTHoLConfig.DeviceID)
             {
                 FixDeviceId();
                 if (deviceId == "minwinpc")
@@ -48,7 +48,7 @@ namespace RPi2FHIoTHubApp
             }
             else
             {
-                deviceId = deviceID.ToString();
+                deviceId = MSIoTKiTHoLJP.IoTHoLConfig.DeviceID.ToString();
             }
             tbDeviceId.Text = deviceId.ToString();
             fezHat = await GIS.FEZHAT.CreateAsync();

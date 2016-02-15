@@ -1,5 +1,5 @@
-﻿//#define ACCESS_MOBILE_SERVICE
-//#define ACCESS_IOT_HUB
+﻿#define ACCESS_MOBILE_SERVICE
+#define ACCESS_IOT_HUB
 using System;
 using System.Collections.Generic;
 using System.Diagnostics;
@@ -23,14 +23,6 @@ namespace RPi2FHIoTHubApp
         // Device Entry Configuration
         string DeviceEntryEndPoint = "http://[mobile service name].azurewebsites.net";
 
-        // Identifier of this board. this value will be set by this app.
-        Guid deviceID = new Guid(/* Your Guid */);
-        double Latitude = 35.62661;
-        double Longitude = 139.740987;
-
-        // IoT Hub Configuration
-        string IoTHubEndpoint = "";
-        string DeviceKey = "";
         bool IoTServiceAvailabled = false;
 
         async Task<bool> TryConnect()
@@ -75,8 +67,8 @@ namespace RPi2FHIoTHubApp
                 {
                     if (re.ServiceAvailable)
                     {
-                        IoTHubEndpoint = re.IoTHubEndpoint;
-                        DeviceKey = re.DeviceKey;
+                        MSIoTKiTHoLJP.IoTHoLConfig.IoTHubEndpoint = re.IoTHubEndpoint;
+                        MSIoTKiTHoLJP.IoTHoLConfig.DeviceKey = re.DeviceKey;
                         Debug.WriteLine("IoT Hub Service Avaliabled");
                     }
                     registed = true;
@@ -89,8 +81,8 @@ namespace RPi2FHIoTHubApp
                 {
                     DeviceId = deviceId.ToString(),
                     ServiceAvailable = false,
-                    IoTHubEndpoint = IoTHubEndpoint,
-                    DeviceKey = DeviceKey
+                    IoTHubEndpoint = MSIoTKiTHoLJP.IoTHoLConfig.IoTHubEndpoint,
+                    DeviceKey = MSIoTKiTHoLJP.IoTHoLConfig.DeviceKey
                 };
                 await table.InsertAsync(entry);
             }
@@ -134,7 +126,7 @@ namespace RPi2FHIoTHubApp
         private void SetupIoTHub()
         {
 #if (ACCESS_IOT_HUB)
-            iotHubConnectionString = "HostName=" + IoTHubEndpoint + ";DeviceId=" + deviceId + ";SharedAccessKey=" + DeviceKey;
+            iotHubConnectionString = "HostName=" + MSIoTKiTHoLJP.IoTHoLConfig.IoTHubEndpoint + ";DeviceId=" + deviceId + ";SharedAccessKey=" + MSIoTKiTHoLJP.IoTHoLConfig.DeviceKey;
             try
             {
                 deviceClient = DeviceClient.CreateFromConnectionString(iotHubConnectionString, Microsoft.Azure.Devices.Client.TransportType.Amqp);
@@ -263,9 +255,9 @@ namespace RPi2FHIoTHubApp
                         accelz = currentReadings[count].AccelZ,
                         deviceId = deviceId.ToString(),
                         temp = currentReadings[count].Temperature,
-                            time = currentReadings[count].Timestamp,
-                        Longitude = Longitude,
-                        Latitude = Latitude
+                        time = currentReadings[count].Timestamp,
+                        Longitude = MSIoTKiTHoLJP.IoTHoLConfig.Longitude,
+                        Latitude = MSIoTKiTHoLJP.IoTHoLConfig.Latitude
                     };
                     sendingBuffers.Add(sensorReading);
                 }
@@ -285,7 +277,7 @@ namespace RPi2FHIoTHubApp
 #endif
         }
 
-        
+
 
         DispatcherTimer debugTimer;
         int debugCount = 0;
