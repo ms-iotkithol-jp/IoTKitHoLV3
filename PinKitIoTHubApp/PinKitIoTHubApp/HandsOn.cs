@@ -19,20 +19,18 @@ namespace PinKitIoTHubApp
     {
 #if (ACCESS_MOBILE_SERVICE)
         // Device Entry Configuration
-        string DeviceEntryEndPoint = "http://[MobileAppName].azurewebsites.net";
+        // string DeviceEntryEndPoint = "http://[MobileAppName].azurewebsites.net";
 
 #endif
 
 #if(ACCESS_IOT_HUB) 
         // IoT Hub Configuration
-        string ioTHubEndpoint = "[IoTHubName].azure-devices.net";
+        // string ioTHubEndpoint = "[IoTHubName].azure-devices.net";
         string deviceKey = "";
 #endif
 
         // Identifier of this board. this value will be set by this app.
         String deviceId = "";
-        double Latitude = 35.62661;
-        double Longitude = 139.740987;
 
         bool IoTServiceAvailabled = false;
 
@@ -164,8 +162,8 @@ namespace PinKitIoTHubApp
                         deviceId = this.deviceId,
                         msgId = deviceId.ToString() + now.ToString("yyyyMMddhhmmssfff"),
                         time = now,
-                        Latitude = Latitude,
-                        Longitude = Longitude
+                        Latitude = IoTHoLConfig.Latitude,
+                        Longitude = IoTHoLConfig.Longitude
                     };
                     Debug.Print("Accelerometer:X=" + accel.X.ToString() + ",Y=" + accel.Y.ToString() + ",Z=" + accel.Z.ToString());
                     Debug.Print("Temperature:" + sensorReading.temp.ToString());
@@ -184,7 +182,7 @@ namespace PinKitIoTHubApp
 #if (ACCESS_MOBILE_SERVICE)
             if (mobileService == null)
             {
-                mobileService = new EGIoTKit.Utility.SimpleMobileAppsClient(DeviceEntryEndPoint);
+                mobileService = new EGIoTKit.Utility.SimpleMobileAppsClient(IoTHoLConfig.DeviceEntryEndPoint);
             }
             var registered = mobileService.Query(DeviceEntryTableName);
             bool registed = false;
@@ -200,9 +198,9 @@ namespace PinKitIoTHubApp
                             IoTServiceAvailabled = (bool)registedEntry["serviceAvailable"];
                             if (IoTServiceAvailabled)
                             {
-                                ioTHubEndpoint = (string)registedEntry["iotHubEndpoint"];
+                                IoTHoLConfig.IoTHubEndpoint = (string)registedEntry["iotHubEndpoint"];
                                 deviceKey = (string)registedEntry["deviceKey"];
-                                Debug.Print("IoT Hub Service Availabled - IoTHubEndpoint=" + ioTHubEndpoint + ",deviceKey=" + deviceKey);
+                                Debug.Print("IoT Hub Service Availabled - IoTHubEndpoint=" + IoTHoLConfig.IoTHubEndpoint + ",deviceKey=" + deviceKey);
                             }
                         }
                         registed = true;
@@ -245,7 +243,7 @@ namespace PinKitIoTHubApp
         private void SetupIoTHub()
         {
 #if (ACCESS_IOT_HUB)
-            iotHubConnectionString = "HostName=" + ioTHubEndpoint + ";DeviceId=" + deviceId + ";SharedAccessKey=" + deviceKey;
+            iotHubConnectionString = "HostName=" + IoTHoLConfig.IoTHubEndpoint + ";DeviceId=" + deviceId + ";SharedAccessKey=" + deviceKey;
             try
             {
                 deviceClient = DeviceClient.CreateFromConnectionString(iotHubConnectionString, TransportType.Http1);
