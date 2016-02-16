@@ -71,6 +71,7 @@ namespace RPi2FHIoTHubApp
                         MSIoTKiTHoLJP.IoTHoLConfig.DeviceKey = re.DeviceKey;
                         Debug.WriteLine("IoT Hub Service Avaliabled");
                     }
+                    IoTServiceAvailabled = re.ServiceAvailable;
                     registed = true;
                     break;
                 }
@@ -87,7 +88,7 @@ namespace RPi2FHIoTHubApp
                 await table.InsertAsync(entry);
             }
 #else
-            if(!string.IsNullOrEmpty(MSIoTKiTHoLJP.IoTHoLConfig.DeviceKey))
+            if (!string.IsNullOrEmpty(MSIoTKiTHoLJP.IoTHoLConfig.DeviceKey))
             {
                 IoTServiceAvailabled = true;
             }
@@ -107,6 +108,7 @@ namespace RPi2FHIoTHubApp
                 uploadTimer = new DispatcherTimer();
                 uploadTimer.Interval = TimeSpan.FromMilliseconds(uploadIntervalMSec);
                 uploadTimer.Tick += UploadTimer_Tick;
+                uploadTimer.Start();
             }
 
         }
@@ -129,10 +131,9 @@ namespace RPi2FHIoTHubApp
             iotHubConnectionString = "HostName=" + MSIoTKiTHoLJP.IoTHoLConfig.IoTHubEndpoint + ";DeviceId=" + deviceId + ";SharedAccessKey=" + MSIoTKiTHoLJP.IoTHoLConfig.DeviceKey;
             try
             {
-                deviceClient = DeviceClient.CreateFromConnectionString(iotHubConnectionString, Microsoft.Azure.Devices.Client.TransportType.Amqp);
+                deviceClient = DeviceClient.CreateFromConnectionString(iotHubConnectionString, Microsoft.Azure.Devices.Client.TransportType.Http1);
                 Debug.Write("IoT Hub Connected.");
                 ReceiveCommands();
-                uploadTimer.Start();
             }
             catch (Exception ex)
             {
