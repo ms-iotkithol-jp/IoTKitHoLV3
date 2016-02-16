@@ -45,14 +45,17 @@ Select((ent => (Models.SASSensorTable)ent)).ToList();
                 );
             string[] sensorTypes = { "accelx", "accely", "accelz", "temp" };
             Dictionary<string, StatUnit> ssUnits = new Dictionary<string, StatUnit>();
-            foreach(var st in sensorTypes)
+            foreach (var st in sensorTypes)
             {
                 ssUnits.Add(st, new StatUnit());
+                ssUnits[st].Max = Double.MinValue;
+                ssUnits[st].Min = Double.MaxValue;
             }
 
-            DateTime startTime=DateTime.Now;
-            DateTime endTime=DateTime.Now.AddDays(-duringDay);
+            DateTime startTime = DateTime.Now;
+            DateTime endTime = DateTime.Now.AddDays(-duringDay);
             var packet = new Models.SensorStatisticsPacket();
+            packet.SensorStatistics = new List<Models.SensorStatisticsUnit>();
             foreach (var sass in sassTable.ExecuteQuery(srQquery))
             {
                 packet.DeviceId = sass.deviceId;
@@ -65,23 +68,25 @@ Select((ent => (Models.SASSensorTable)ent)).ToList();
             }
             packet.EndTimestamp = endTime;
             packet.StartTimestamp = startTime;
-            foreach(var st in sensorTypes)
+            foreach (var st in sensorTypes)
             {
                 var unit = new Models.SensorStatisticsUnit()
                 {
                     Count = ssUnits[st].Count,
                     SensorType = st,
-                    SensorValueMax=ssUnits[st].Max,
-                    SensorValueMin=ssUnits[st].Min
+                    SensorValueMax = ssUnits[st].Max,
+                    SensorValueMin = ssUnits[st].Min
                 };
                 if (unit.Count > 0)
                 {
-                    unit.SensorValueAvg = ssUnits[st].Total / unit.Count;
+                    unit.SensorValueAvg = ssUnits[st].Avg;
+                    unit.SensorValueStd = ssUnits[st].Std;
                 }
                 packet.SensorStatistics.Add(unit);
             }
             return packet;
         }
+
         class StatUnit
         {
             public double Total { get; set; }
@@ -94,8 +99,23 @@ Select((ent => (Models.SASSensorTable)ent)).ToList();
                 Total += value;
                 if (Max < value) Max = value;
                 if (Min > value) Min = value;
+                values.Add(value);
             }
             public double Avg { get { return Total / Count; } }
+            public double Std
+            {
+                get
+                {
+                    double std = 0;
+                    double avg = Avg;
+                    foreach (var val in values)
+                    {
+                        std += (val - avg) * (val - avg);
+                    }
+                    return Math.Sqrt(std / values.Count);
+                }
+            }
+            private List<double> values = new List<double>();
         }
     }
 }

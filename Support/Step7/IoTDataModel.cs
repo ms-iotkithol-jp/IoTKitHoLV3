@@ -40,6 +40,7 @@ namespace IoTWeb.Models
         public double SensorValueAvg { get; set; }
         public double SensorValueMin { get; set; }
         public double SensorValueMax { get; set; }
+        public double SensorValueStd { get; set; }
     }
 
     public class SensorStatisticsPacket
