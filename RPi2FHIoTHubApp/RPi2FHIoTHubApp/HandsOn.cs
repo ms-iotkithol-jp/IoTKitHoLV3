@@ -1,5 +1,5 @@
-﻿#define ACCESS_MOBILE_SERVICE
-#define ACCESS_IOT_HUB
+﻿//#define ACCESS_MOBILE_SERVICE
+//#define ACCESS_IOT_HUB
 using System;
 using System.Collections.Generic;
 using System.Diagnostics;
@@ -21,7 +21,7 @@ namespace RPi2FHIoTHubApp
     public partial class MainPage
     {
         // Device Entry Configuration
-        string DeviceEntryEndPoint = "http://[mobile service name].azurewebsites.net";
+        //　string DeviceEntryEndPoint = "http://[mobile service name].azurewebsites.net";
 
         bool IoTServiceAvailabled = false;
 
@@ -55,7 +55,7 @@ namespace RPi2FHIoTHubApp
 #if (ACCESS_MOBILE_SERVICE)
             if (mobileService == null)
             {
-                mobileService = new MobileServiceClient(DeviceEntryEndPoint);
+                mobileService = new MobileServiceClient(MSIoTKiTHoLJP.IoTHoLConfig.DeviceEntryEndPoint);
             }
             var table = mobileService.GetTable<Models.DeviceEntry>();
             var registered = await table.Where((de) => de.DeviceId == deviceId.ToString()).ToListAsync();
@@ -87,7 +87,7 @@ namespace RPi2FHIoTHubApp
                 await table.InsertAsync(entry);
             }
 #else
-            if(!string.IsNullOrEmpty(DeviceKey))
+            if(!string.IsNullOrEmpty(MSIoTKiTHoLJP.IoTHoLConfig.DeviceKey))
             {
                 IoTServiceAvailabled = true;
             }
