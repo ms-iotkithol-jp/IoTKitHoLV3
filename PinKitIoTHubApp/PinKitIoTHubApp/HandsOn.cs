@@ -98,8 +98,10 @@ namespace PinKitIoTHubApp
             content = "[" + content + "]";
             try
             {
-                var message = new Message(System.Text.UTF8Encoding.UTF8.GetBytes(content));
-                deviceClient.SendEvent(message);
+                using (var message = new Message(System.Text.UTF8Encoding.UTF8.GetBytes(content)))
+                {
+                    deviceClient.SendEvent(message);
+                }
                 Debug.Print("Send[" + counter++ + "] - " + DateTime.Now.Ticks);
                 BlinkPinKitLED(PinKit.BoardFullColorLED.Colors.Blue, 1000, 500, 5);
             }

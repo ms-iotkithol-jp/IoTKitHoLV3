@@ -13,11 +13,11 @@ namespace EGIoTKit.Utility
         public SimpleMobileAppsClient(string url)
         {
             MobileAppsEndpoint = url;
-            if (url.IndexOf("http://") < 0)
+            if (MobileAppsEndpoint.IndexOf("http://") < 0)
             {
-                url = "http://" + url;
+                MobileAppsEndpoint = "http://" + MobileAppsEndpoint;
             }
-            if (url.LastIndexOf("/") != url.Length - 1)
+            if (MobileAppsEndpoint.LastIndexOf("/") != MobileAppsEndpoint.Length - 1)
             {
                 MobileAppsEndpoint += "/";
             }
