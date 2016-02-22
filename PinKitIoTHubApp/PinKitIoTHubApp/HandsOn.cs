@@ -51,7 +51,6 @@ namespace PinKitIoTHubApp
                 {
                     request.Headers.Add("device-id", IoTDeviceId.ToString());
                     request.Headers.Add("device-message", "hello from pinkit");
-#if false
                     using (var response = request.GetResponse() as HttpWebResponse)
                     {
                         if (response.StatusCode == HttpStatusCode.OK)
@@ -61,7 +60,6 @@ namespace PinKitIoTHubApp
                             Debug.Print(message);
                         }
                     }
-#endif
                     deviceId = IoTDeviceId;
                 }
             }
