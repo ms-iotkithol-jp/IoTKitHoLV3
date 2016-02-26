@@ -14,6 +14,10 @@ namespace WpfEmuIoTHubApp
 {
 #if (ACCESS_IOT_HUB)
     using Microsoft.Azure.Devices.Client;
+#if (ACCESS_MOBILE_SERVICE)
+#else
+    using Newtonsoft.Json;
+#endif
 #endif
 #if (ACCESS_MOBILE_SERVICE)
     using Microsoft.WindowsAzure.MobileServices;
@@ -25,8 +29,7 @@ namespace WpfEmuIoTHubApp
         string DeviceEntryEndPoint = "http://[mobile service name].azurewebsites.net";
 
         // Identifier of this board. this value will be set by this app.
-        Guid deviceId = new Guid(0x1a8216fe, 0xf180, 0x48f4, 0x82, 0xb3, 0xab, 0xff, 0x8a, 0x7c, 0xb8, 0xac);
-  //      Guid deviceId = new Guid(/* Your Guid */);
+        Guid deviceId = new Guid(/* Your Guid */);
         double Latitude = 35.62661;
         double Longitude = 139.740987;
 
@@ -117,6 +120,8 @@ namespace WpfEmuIoTHubApp
                     Debug.Write(ex.Message);
                 }
             }
+#else
+            IoTServiceAvailabled = true;
 #endif
         }
 
@@ -207,7 +212,7 @@ namespace WpfEmuIoTHubApp
                     if (receivedMessage != null)
                     {
                         messageData = Encoding.ASCII.GetString(receivedMessage.GetBytes());
-                        txtReceivedCommand.Text = messageData
+                        txtReceivedCommand.Text = messageData;
                         Debug.WriteLine("\t{0}> Received message: {1}", DateTime.Now.ToLocalTime(), messageData);
                         await deviceClient.CompleteAsync(receivedMessage);
                     }
