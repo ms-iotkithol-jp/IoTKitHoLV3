@@ -36,8 +36,9 @@ namespace DeviceMonitorWebJob
                 {
                     var reader = new StreamReader(stream);
                     var body = reader.ReadToEnd();
-                    body = body.Substring(body.IndexOf("\u0001") + 1);
-                    body = body.Substring(0, body.Length - 1);
+                    int startBody = body.IndexOf("{");
+                    int endBody = body.LastIndexOf("}");
+                    body = body.Substring(startBody, endBody - startBody + 1);
                     var rcvdDevStatus = JsonConvert.DeserializeObject<DeviceStatus>(body);
                     var deviceStatus = new DeviceStatus()
                     {
