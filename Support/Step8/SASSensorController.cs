@@ -33,7 +33,7 @@ Select((ent => (Models.SASSensorTable)ent)).ToList();
     public class SensorStatisticsController : ApiController
     {
 
-        public Models.SensorStatisticsPacket Get([FromUri]int duringDay)
+        public List<Models.SensorStatisticsPacket> Get([FromUri]int duringDay)
         {
             var storeCS = CloudConfigurationManager.GetSetting("StorageConnectionString");
             var storageAccount = CloudStorageAccount.Parse(storeCS);
@@ -44,47 +44,65 @@ Select((ent => (Models.SASSensorTable)ent)).ToList();
  QueryComparisons.GreaterThanOrEqual, DateTimeOffset.Now.AddDays(-duringDay))
                 );
             string[] sensorTypes = { "accelx", "accely", "accelz", "temp" };
-            Dictionary<string, StatUnit> ssUnits = new Dictionary<string, StatUnit>();
-            foreach (var st in sensorTypes)
-            {
-                ssUnits.Add(st, new StatUnit());
-                ssUnits[st].Max = Double.MinValue;
-                ssUnits[st].Min = Double.MaxValue;
-            }
-
+   
             DateTime startTime = DateTime.Now;
             DateTime endTime = DateTime.Now.AddDays(-duringDay);
-            var packet = new Models.SensorStatisticsPacket();
-            packet.SensorStatistics = new List<Models.SensorStatisticsUnit>();
-            foreach (var sass in sassTable.ExecuteQuery(srQquery))
+            var dssUnits = new Dictionary<string, Dictionary<string, StatUnit>>();
+            var dstatistics = new Dictionary<string, Models.SensorStatisticsPacket>();
+            foreach(var sass in sassTable.ExecuteQuery(srQquery))
             {
-                packet.DeviceId = sass.deviceId;
-                if (startTime > sass.time) startTime = sass.time;
-                if (endTime < sass.time) endTime = sass.time;
-                ssUnits["accelx"].Add(sass.accelx);
-                ssUnits["accely"].Add(sass.accely);
-                ssUnits["accelz"].Add(sass.accelz);
-                ssUnits["temp"].Add(sass.temp);
-            }
-            packet.EndTimestamp = endTime;
-            packet.StartTimestamp = startTime;
-            foreach (var st in sensorTypes)
-            {
-                var unit = new Models.SensorStatisticsUnit()
+                if (!dssUnits.ContainsKey(sass.deviceId))
                 {
-                    Count = ssUnits[st].Count,
-                    SensorType = st,
-                    SensorValueMax = ssUnits[st].Max,
-                    SensorValueMin = ssUnits[st].Min
-                };
-                if (unit.Count > 0)
-                {
-                    unit.SensorValueAvg = ssUnits[st].Avg;
-                    unit.SensorValueStd = ssUnits[st].Std;
+                    Dictionary<string, StatUnit> units = new Dictionary<string, StatUnit>();
+                    foreach (var st in sensorTypes)
+                    {
+                        units.Add(st, new StatUnit());
+                        units[st].Max = Double.MinValue;
+                        units[st].Min = Double.MaxValue;
+                    }
+                    dssUnits.Add(sass.deviceId, units);
+                    var ssp = new Models.SensorStatisticsPacket();
+                    ssp.StartTimestamp = startTime;
+                    ssp.EndTimestamp = endTime;
+                    ssp.DeviceId = sass.deviceId;
+                    ssp.SensorStatistics = new List<Models.SensorStatisticsUnit>();
+                    dstatistics.Add(sass.deviceId, ssp);
                 }
-                packet.SensorStatistics.Add(unit);
+                if (dstatistics[sass.deviceId].StartTimestamp > sass.time)
+                {
+                    dstatistics[sass.deviceId].StartTimestamp = sass.time;
+                }
+                if (dstatistics[sass.deviceId].EndTimestamp < sass.time)
+                {
+                    dstatistics[sass.deviceId].EndTimestamp = sass.time;
+                }
+                dssUnits[sass.deviceId]["accelx"].Add(sass.accelx);
+                dssUnits[sass.deviceId]["accely"].Add(sass.accely);
+                dssUnits[sass.deviceId]["accelz"].Add(sass.accelz);
+                dssUnits[sass.deviceId]["temp"].Add(sass.temp);
             }
-            return packet;
+            var stats = new List<Models.SensorStatisticsPacket>();
+            foreach (var devId in dssUnits.Keys)
+            {
+                foreach (var st in sensorTypes)
+                {
+                    var unit = new Models.SensorStatisticsUnit()
+                    {
+                        Count = dssUnits[devId][st].Count,
+                        SensorType = st,
+                        SensorValueMax = dssUnits[devId][st].Max,
+                        SensorValueMin = dssUnits[devId][st].Min
+                    };
+                    if (unit.Count > 0)
+                    {
+                        unit.SensorValueAvg = dssUnits[devId][st].Avg;
+                        unit.SensorValueStd = dssUnits[devId][st].Std;
+                        dstatistics[devId].SensorStatistics.Add(unit);
+                    }
+                }
+                stats.Add(dstatistics[devId]);
+            }
+            return stats;
         }
 
         class StatUnit
