@@ -67,7 +67,7 @@ namespace DeviceMonitorWebJob
 
                         await stepProxy.Invoke("Notify", new[] { new IoTKitHolTrackingPacket() {
                          DeviceId=deviceStatus.DeviceId,
-                         HolVersion="V2R3",
+                         HolVersion="V3",
                          HolStep="Step9",
                          Message="Working"  } });
                     }
