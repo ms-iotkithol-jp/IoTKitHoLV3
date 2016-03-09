@@ -81,23 +81,26 @@ namespace PinKitIoTHubApp
 #if (ACCESS_IOT_HUB)
 
             string content = "";
-            lock (this)
-            {
-                for (int i = 0; i < srCount; i++)
-                {
-                    var srjson = Json.NETMF.JsonSerializer.SerializeObject(sensorReadings[i]);
-                    if (i > 0)
-                    {
-                        content += ",";
-                    }
-                    content += srjson;
-                    sensorReadings[i] = null;
-                }
-                srCount = 0;
-            }
-            content = "[" + content + "]";
             try
             {
+                lock (this)
+                {
+                    for (int i = 0; i < srCount; i++)
+                    {
+                        if (sensorReadings[i] != null)
+                        {
+                            var srjson = Json.NETMF.JsonSerializer.SerializeObject(sensorReadings[i]);
+                            if (content != "")
+                            {
+                                content += ",";
+                            }
+                            content += srjson;
+                            sensorReadings[i] = null;
+                        }
+                    }
+                    srCount = 0;
+                }
+                content = "[" + content + "]";
                 using (var message = new Message(System.Text.UTF8Encoding.UTF8.GetBytes(content)))
                 {
                     deviceClient.SendEvent(message);
