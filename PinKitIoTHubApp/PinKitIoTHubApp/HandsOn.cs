@@ -25,7 +25,7 @@ namespace PinKitIoTHubApp
 
 #if(ACCESS_IOT_HUB) 
         // IoT Hub Configuration
-        // string ioTHubEndpoint = "[IoTHubName].azure-devices.net";
+        // string ioTHubEndpoint = "[IoTHubName].azure-devices.net"; -> IoTHubConfig.cs
         string deviceKey = "";
 #endif
 
@@ -74,7 +74,6 @@ namespace PinKitIoTHubApp
             }
         }
 
-        int counter = 0;
         void Upload()
         {
             Debug.Print("Sending message of " + srCount + " to IoT Hub..." + DateTime.Now.Ticks);
@@ -95,7 +94,6 @@ namespace PinKitIoTHubApp
                                 content += ",";
                             }
                             content += srjson;
-                            sensorReadings[i] = null;
                         }
                     }
                     srCount = 0;
@@ -105,7 +103,8 @@ namespace PinKitIoTHubApp
                 {
                     deviceClient.SendEvent(message);
                 }
-                Debug.Print("Send[" + counter++ + "] - " + DateTime.Now.Ticks);
+                GC.WaitForPendingFinalizers();
+                Debug.Print("Send[" + sendRound++ + "] - " + DateTime.Now.Ticks);
                 BlinkPinKitLED(PinKit.BoardFullColorLED.Colors.Blue, 1000, 500, 5);
             }
             catch (Exception ex)
@@ -146,6 +145,7 @@ namespace PinKitIoTHubApp
             uploadTimer.Start();
         }
 
+        int sendRound = 0;
         private void MeasureTimer_Tick(object sender, EventArgs e)
         {
             measureTimer.Stop();
@@ -156,21 +156,18 @@ namespace PinKitIoTHubApp
                 {
                     var now = DateTime.Now;
                     var accel = pinkit.Accelerometer.TakeMeasurements();
-                    var sensorReading = new PinKitIoTApp.Models.SensorReading()
-                    {
-                        temp = pinkit.Temperature.TakeMeasurement(),
-                        accelx = accel.X,
-                        accely = accel.Y,
-                        accelz = accel.Z,
-                        deviceId = this.deviceId,
-                        msgId = deviceId.ToString() + now.ToString("yyyyMMddhhmmssfff"),
-                        time = now,
-                        Latitude = IoTHoLConfig.Latitude,
-                        Longitude = IoTHoLConfig.Longitude
-                    };
-                    Debug.Print("Accelerometer:X=" + accel.X.ToString() + ",Y=" + accel.Y.ToString() + ",Z=" + accel.Z.ToString());
-                    Debug.Print("Temperature:" + sensorReading.temp.ToString());
-                    sensorReadings[srCount++] = sensorReading;
+                    sensorReadings[srCount].temp = pinkit.Temperature.TakeMeasurement();
+                    sensorReadings[srCount].accelx = accel.X;
+                    sensorReadings[srCount].accely = accel.Y;
+                    sensorReadings[srCount].accelz = accel.Z;
+                    sensorReadings[srCount].deviceId = this.deviceId;
+                    sensorReadings[srCount].msgId = deviceId.ToString() + now.ToString("yyyyMMddhhmmssfff");
+                    sensorReadings[srCount].time = now;
+                    sensorReadings[srCount].Latitude = IoTHoLConfig.Latitude;
+                    sensorReadings[srCount].Longitude = IoTHoLConfig.Longitude;
+
+                    Debug.Print("Measured[" + sendRound + "][" + srCount + "].msgId=" + sensorReadings[srCount].msgId);
+                    srCount++;
                 }
             }
             measureTimer.Start();
@@ -231,6 +228,10 @@ namespace PinKitIoTHubApp
             {
                 srMax = (int)(uploadIntervalMSec / measureIntervalMSec);
                 sensorReadings = new PinKitIoTApp.Models.SensorReading[srMax];
+                for (int i = 0; i < srMax; i++)
+                {
+                    sensorReadings[i] = new PinKitIoTApp.Models.SensorReading();
+                }
                 srCount = 0;
             }
         }
