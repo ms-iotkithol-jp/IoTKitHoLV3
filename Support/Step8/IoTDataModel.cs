@@ -13,6 +13,8 @@ namespace IoTWeb.Models
         public double accely { get; set; }
         public double accelz { get; set; }
         public double temp { get; set; }
+        public double Longitude { get; set; }
+        public double Latitude { get; set; }
         public DateTime time { get; set; }
     }
 
@@ -48,6 +50,8 @@ namespace IoTWeb.Models
         public string DeviceId { get; set; }
         public DateTime StartTimestamp { get; set; }
         public DateTime EndTimestamp { get; set; }
+        public double LastLongitude { get; set; }
+        public double LastLatitude { get; set; }
         public List<SensorStatisticsUnit> SensorStatistics { get; set; }
     }
 

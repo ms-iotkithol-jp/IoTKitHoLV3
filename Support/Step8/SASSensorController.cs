@@ -49,6 +49,8 @@ Select((ent => (Models.SASSensorTable)ent)).ToList();
             DateTime endTime = DateTime.Now.AddDays(-duringDay);
             var dssUnits = new Dictionary<string, Dictionary<string, StatUnit>>();
             var dstatistics = new Dictionary<string, Models.SensorStatisticsPacket>();
+            double lastLongitude = 0;
+            double lastLatitude = 0;
             foreach(var sass in sassTable.ExecuteQuery(srQquery))
             {
                 if (!dssUnits.ContainsKey(sass.deviceId))
@@ -65,6 +67,8 @@ Select((ent => (Models.SASSensorTable)ent)).ToList();
                     ssp.StartTimestamp = startTime;
                     ssp.EndTimestamp = endTime;
                     ssp.DeviceId = sass.deviceId;
+                    ssp.LastLatitude = sass.Latitude;
+                    ssp.LastLongitude = sass.Longitude;
                     ssp.SensorStatistics = new List<Models.SensorStatisticsUnit>();
                     dstatistics.Add(sass.deviceId, ssp);
                 }
