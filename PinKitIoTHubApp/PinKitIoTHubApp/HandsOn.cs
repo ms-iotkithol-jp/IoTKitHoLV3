@@ -88,7 +88,16 @@ namespace PinKitIoTHubApp
                     {
                         if (sensorReadings[i] != null)
                         {
-                            var srjson = Json.NETMF.JsonSerializer.SerializeObject(sensorReadings[i]);
+                            var measuredTime = sensorReadings[i].time.ToString("yyyy-MM-ddThh:mm:ss.fffZ");
+                            var srjson = "{\"accelx\":" + sensorReadings[i].accelx
+                                + ",\"accely\":" + sensorReadings[i].accely
+                                + ",\"accelz\":" + sensorReadings[i].accelz
+                                + ",\"temp\":" + sensorReadings[i].temp
+                                + ",\"time\":\"" + sensorReadings[i].time.ToString("yyyy-MM-ddThh:mm:ss.fffZ")
+                                + "\",\"msgId\":\"" + sensorReadings[i].deviceId + measuredTime
+                                + "\",\"Latitude\":" + sensorReadings[i].Latitude
+                                + ",\"Longitude\":" + sensorReadings[i].Longitude
+                                + ",\"deviceId\":\"" + sensorReadings[i].deviceId + "\"}";
                             if (content != "")
                             {
                                 content += ",";
@@ -119,8 +128,8 @@ namespace PinKitIoTHubApp
         DispatcherTimer uploadTimer;
         long measureIntervalMSec = 1000; // measure interval 1000 msec
         long uploadIntervalMSec = 120000;  // upload interval 1000 msec
-        
-          private void Initialize()
+
+        private void Initialize()
         {
             InitializeUpload();
 
@@ -289,13 +298,13 @@ namespace PinKitIoTHubApp
                             var buf = receivedMessage.GetBytes();
                             if (buf != null && buf.Length > 0)
                             {
-                                var content = new string(System.Text.UTF8Encoding.UTF8.GetChars(buf));                                
+                                var content = new string(System.Text.UTF8Encoding.UTF8.GetChars(buf));
                                 Debug.Print(DateTime.Now.ToLocalTime() + "> Received Message:" + content);
 
                                 deviceClient.Complete(receivedMessage);
 
                                 string lContent = content.ToLower();
-                                foreach(var ccKey in commandColors.Keys)
+                                foreach (var ccKey in commandColors.Keys)
                                 {
                                     if (lContent.IndexOf((string)ccKey) > 0)
                                     {
@@ -305,7 +314,7 @@ namespace PinKitIoTHubApp
                             }
                         }
                     }
-                    catch(Exception ex)
+                    catch (Exception ex)
                     {
                         Debug.Print("Receive Error - " + ex.Message);
                         BlinkPinKitLED(PinKit.BoardFullColorLED.Colors.Yellow, 1000, 500, 5);
@@ -316,7 +325,7 @@ namespace PinKitIoTHubApp
         }
 #endif
 
-        private void BlinkPinKitLED(PinKit.BoardFullColorLED.Colors color, int onmsec,int offmsec, int blinkCount)
+        private void BlinkPinKitLED(PinKit.BoardFullColorLED.Colors color, int onmsec, int offmsec, int blinkCount)
         {
             new Thread(() =>
             {
