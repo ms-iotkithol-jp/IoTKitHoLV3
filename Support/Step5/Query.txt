@@ -1,7 +1,7 @@
 SELECT * INTO ThrOutput FROM sensor;
 
 SELECT deviceId as deviceId, time as time, accelx, accely, accelz, msgId,
-CASE WHEN temp>34.0 THEN 'HoT'  ELSE 'Cold' END as TempStatus
+CASE WHEN temp>30.0 THEN 'HoT'  ELSE 'Cold' END as TempStatus
 INTO MLOutput FROM sensor
 
 SELECT deviceId as deviceId, msgId, time as time, Avg(temp) as tempAvg,
