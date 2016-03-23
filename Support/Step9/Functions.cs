@@ -25,13 +25,8 @@ namespace DeviceMonitorWebJob
             {
                 if (hub.State == ConnectionState.Disconnected)
                 {
-                    await hub.Start();
+                    hub.Start().Wait();
                 }
-                if (stepHub.State== ConnectionState.Disconnected)
-                {
-                    await stepHub.Start();
-                }
-
                 using (var stream = msg.GetBody<Stream>())
                 {
                     var reader = new StreamReader(stream);
@@ -62,16 +57,20 @@ namespace DeviceMonitorWebJob
                     }
                     if (LastStatus != currentStatus)
                     {
-                        await proxy.Invoke("Update", new[] { deviceStatus });
+                        proxy.Invoke("Update", new[] { deviceStatus });
                         LastStatus = currentStatus;
 
-                        await stepProxy.Invoke("Notify", new[] { new IoTKitHolTrackingPacket() {
-                         DeviceId=deviceStatus.DeviceId,
-                         HolVersion="V3",
-                         HolStep="Step9",
-                         Message="Working"  } });
+                        if (stepHub.State == ConnectionState.Disconnected)
+                        {
+                            stepHub.Start().Wait();
+                            stepProxy.Invoke("Notify", new[] { new IoTKitHolTrackingPacket() {
+                                DeviceId =deviceStatus.DeviceId,
+                                HolVersion ="V3",
+                                HolStep ="Step9",
+                                Message ="Working" }
+                            });
+                        }
                     }
-
                     logger.WriteLine(body);
                 }
                 //   msg.
@@ -81,8 +80,7 @@ namespace DeviceMonitorWebJob
             {
                 logger.WriteLine("Failed - " + ex.Message);
             }
-        }
-        static int LastStatus = 0;
+        }        static int LastStatus = 0;
         static HubConnection stepHub = new HubConnection("http://egholservice.azurewebsites.net/");
         static IHubProxy stepProxy = stepHub.CreateHubProxy("HoLTrackHub");
     }
