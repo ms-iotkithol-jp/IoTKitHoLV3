@@ -26,10 +26,8 @@ namespace WpfEmuIoTHubApp
     public partial class MainWindow
     {
         // Device Entry Configuration
-        string DeviceEntryEndPoint = "http://[mobile service name].azurewebsites.net";
+        //string DeviceEntryEndPoint = "http://[mobile service name].azurewebsites.net";
 
-        // Identifier of this board. this value will be set by this app.
-        Guid deviceId = new Guid(/* Your Guid */);
         double Latitude = 35.62661;
         double Longitude = 139.740987;
 
@@ -42,7 +40,7 @@ namespace WpfEmuIoTHubApp
         {
             bool result = false;
             var request = HttpWebRequest.Create("http://egholservice.azurewebsites.net/api/DeviceConnect") as HttpWebRequest;
-            request.Headers.Add("device-id", deviceId.ToString());
+            request.Headers.Add("device-id", IoTHoLConfig.deviceId.ToString());
             request.Headers.Add("device-message", "Hello from Wpf Emulator");
             using (var response = request.GetResponse() as HttpWebResponse)
             {
@@ -67,6 +65,11 @@ namespace WpfEmuIoTHubApp
 
         async void InitializeUpload()
         {
+            if (IoTHoLConfig.Latitude != null && IoTHoLConfig.Longitude != null)
+            {
+                Latitude = IoTHoLConfig.Latitude.Value;
+                Longitude = IoTHoLConfig.Longitude.Value;
+            }
             await EntryDevice();
             if (IoTServiceAvailabled)
             {
@@ -97,11 +100,11 @@ namespace WpfEmuIoTHubApp
                 var now = DateTime.Now;
                 var sensorReading = new Models.SensorReading()
                 {
-                    msgId = deviceId.ToString() + now.ToString("yyyyMMddhhmmssfff")
+                    msgId = IoTHoLConfig.deviceId.ToString() + now.ToString("yyyyMMddhhmmssfff")
                 };
                 lock (this)
                 {
-                    sensorReading.deviceId = deviceId.ToString();
+                    sensorReading.deviceId = IoTHoLConfig.deviceId.ToString();
                     sensorReading.accelx = lastAccelX;
                     sensorReading.accely = lastAccelY;
                     sensorReading.accelz = lastAccelZ;
@@ -133,7 +136,7 @@ namespace WpfEmuIoTHubApp
         void SetupIoTHub()
         {
 #if (ACCESS_IOT_HUB)
-            iotHubConnectionString = "HostName=" + IoTHubEndpoint + ";DeviceId=" + deviceId + ";SharedAccessKey=" + DeviceKey;
+            iotHubConnectionString = "HostName=" + IoTHubEndpoint + ";DeviceId=" +IoTHoLConfig.deviceId + ";SharedAccessKey=" + DeviceKey;
             try {
                 deviceClient = DeviceClient.CreateFromConnectionString(iotHubConnectionString, Microsoft.Azure.Devices.Client.TransportType.Amqp);
                 Debug.Write("IoT Hub Connected.");
@@ -155,10 +158,10 @@ namespace WpfEmuIoTHubApp
 #if (ACCESS_MOBILE_SERVICE)
                 if (mobileService == null)
                 {
-                    mobileService = new MobileServiceClient(DeviceEntryEndPoint);
+                    mobileService = new MobileServiceClient(IoTHoLConfig.DeviceEntryEndPoint);
                 }
                 var table = mobileService.GetTable<Models.DeviceEntry>();
-                var registered = await table.Where((de) => de.DeviceId == deviceId.ToString()).ToListAsync();
+                var registered = await table.Where((de) => de.DeviceId == IoTHoLConfig.deviceId.ToString()).ToListAsync();
 
                 bool registed = false;
                 if (registered != null && registered.Count > 0)
@@ -181,7 +184,7 @@ namespace WpfEmuIoTHubApp
                 {
                     var entry = new Models.DeviceEntry()
                     {
-                        DeviceId = deviceId.ToString(),
+                        DeviceId = IoTHoLConfig.deviceId.ToString(),
                         ServiceAvailable = IoTServiceAvailabled,
                         IoTHubEndpoint = IoTHubEndpoint,
                         DeviceKey = DeviceKey
