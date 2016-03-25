@@ -46,6 +46,11 @@ namespace PinKitIoTHubApp
                 if (IoTDeviceId == "" && pinkit.DeviceName != "")
                 {
                     IoTDeviceId = pinkit.DeviceName;
+                    if (IoTDeviceId== "PinKit.1C.00.11.33.44.55")
+                    {
+                        Debug.Print("Please set valid MAC Address by MFDeploy tool!");
+                        throw new ArgumentOutOfRangeException("MAC address is default value.");
+                    }
                 }
                 if (IoTDeviceId != "")
                 {
