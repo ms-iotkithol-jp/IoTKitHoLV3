@@ -49,8 +49,10 @@ namespace PinKitIoTHubApp
                     if (IoTDeviceId== "PinKit.1C.00.11.33.44.55")
                     {
                         Debug.Print("Please set valid MAC Address by MFDeploy tool!");
-                        throw new ArgumentOutOfRangeException("MAC address is default value.");
+                  //      throw new ArgumentOutOfRangeException("MAC address is default value.");
+                        IoTDeviceId = IoTDeviceId.Substring(0, IoTDeviceId.Length - 5) + (DateTime.Now.Ticks % 1000).ToString();
                     }
+                    Debug.Print("Your DeviceId is '" + IoTDeviceId + "'");
                 }
                 if (IoTDeviceId != "")
                 {
@@ -66,6 +68,7 @@ namespace PinKitIoTHubApp
                         }
                     }
                     deviceId = IoTDeviceId;
+                    // At Step 1, Please stop this application at the above line.
                 }
             }
         }
