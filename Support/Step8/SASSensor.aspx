@@ -6,37 +6,206 @@
 <head runat="server">
 <meta http-equiv="Content-Type" content="text/html; charset=utf-8"/>
     <title>Stored Sensor Data by Stream Analytics</title>
+    <link href="visuals.css" rel="stylesheet" />
     <script type="text/javascript" src="Scripts/jquery-1.10.2.min.js" ></script>
     <script type="text/javascript" src="Scripts/jquery.signalR-2.2.0.min.js"></script>
     <script type="text/javascript" src="SignalR/hubs" ></script>
+    <script type="text/javascript" src="Scripts/powerbi-visuals.all.min.js"></script>
+    <style>
+        .visual {
+            'background-color' : 'white',
+            'padding' : '10px',
+            'margin' : '5px'
+        }
+    </style>
+
     <script type="text/javascript">
         $(function () {
-            var rows = 0;
-            var table = document.getElementById("table1");
-
-            function AddRow(pId,pAccelX,pAccelY,pAccelZ,pTemp,pTime) {
-                var row = table.insertRow(++rows);
-                var colName = row.insertCell(0);
-                colName.innerHTML = pId;
-                var colDesc1 = row.insertCell(1);
-                colDesc1.innerHTML = pAccelX;
-                var colDesc2 = row.insertCell(2);
-                colDesc2.innerHTML = pAccelY;
-                var colDesc3 = row.insertCell(3);
-                colDesc3.innerHTML = pAccelZ;
-                var colDesc4 = row.insertCell(4);
-                colDesc4.innerHTML = pTemp;
-                var colDesc5 = row.insertCell(5);
-                colDesc5.innerHTML = pTime;
-            }
-            $.get("/api/SASSensor", {},
-                function (result) {
-                    // alert(result);
-                    for (var i = 0; i < result.length&&i<50; i++) {
-                        var sr = result[i];
-                        AddRow(sr.deviceId, sr.accelx, sr.accely, sr.accelz, sr.temp, sr.time);
-                    }
+            var dataOfDevices = [];
+            var dataViews = [];
+            var columns = [];
+            var graphMetadata = {
+                columns: [
+                    {
+                        displayName: 'Time',
+                        isMeasure: true,
+                        queryName: 'timestamp',
+                        type: powerbi.ValueType.fromDescriptor({ dateTime: true }),
+                    },
+                ]
+            };
+            function CreateGraph(items) {
+                var count = 0;
+                items.sort(function (v1, v2) {
+                    return (v1.time > v2.time ? 1 : -1);
                 });
+                items.forEach(function (item) {
+                    if (dataOfDevices.length === 0) {
+                        var dataSetOfDevice = { deviceId: item.deviceId, data: [item] };
+                        dataOfDevices.push(dataSetOfDevice);
+                    }
+                    else {
+                        var existed = false;
+                        var i = 0;
+                        for (; i < dataOfDevices.length; i++) {
+                            if (dataOfDevices[i].deviceId === item.deviceId) {
+                                existed = true;
+                                break;
+                            }
+                        }
+                        if (existed) {
+                            dataOfDevices[i].data.push(item);
+                        }
+                        else {
+                            var dataSetOfDevice = { deviceId: item.deviceId, data: [item] };
+                            dataOfDevices.push(dataSetOfDevice);
+                        }
+                    }
+                    var deviceId = item.deviceId;
+                });
+
+                var fieldExpr = powerbi.data.SQExprBuilder.fieldExpr({ column: { entity: "table1", name: "time" } });
+
+                dataOfDevices.forEach(function (dod) {
+                    var producedGD = {
+                        temperatures: [],
+                        timestamps: []
+                    };
+                    count++;
+                    dod.data.forEach(function (itemData) {
+                        producedGD.temperatures.push(itemData.temp);
+                        var dateTime = new Date(itemData.time);
+                        if (!dateTime.replase) {
+                            dateTime.replace = ('' + this).replace;
+                        }
+                        producedGD.timestamps.push(dateTime);
+                    });
+
+                    var categoryValues = producedGD.timestamps;
+                    var categoryIdentities =
+                        categoryValues.map(
+                        function (value) {
+                            var expr = powerbi.data.SQExprBuilder.equal(fieldExpr, powerbi.data.SQExprBuilder.text(value));
+                            return powerbi.data.createDataViewScopeIdentity(expr);
+                        }
+                    );
+
+                    graphMetadata.columns.push({
+                        displayName: dod.deviceId,
+                        isMeasure: true,
+                        format: "0.00",
+                        queryName: dod.deviceId + ':temperature',
+                        type: powerbi.ValueType.fromDescriptor({ numeric: true })
+                    });
+
+                    columns.push({
+                        source: graphMetadata.columns[count],
+                        values: producedGD.temperatures
+                    });
+
+                    var dataValues = dataViewTransform.createValueColumns(columns);
+
+                    var categoryMetadata = {
+                        categories: [{
+                            source: graphMetadata.columns[0],
+                            values: categoryValues,
+                            identity: categoryIdentities
+                        }],
+                        values: dataValues
+                    };
+
+                    var dataView = {
+                        metadata: graphMetadata,
+                        categorical: categoryMetadata
+                    };
+                    dataViews.push(dataView);
+
+
+                });
+
+                var viewport = { height: height, width: width };
+
+                if (visual.update) {
+                    // Call update to draw the visual with some data
+                    visual.update({
+                        dataViews: dataViews,
+                        viewport: viewport,
+                        duration: 0
+                    });
+                } else if (visual.onDataChanged && visual.onResizing) {
+                    // Call onResizing and onDataChanged (old API) to draw the visual with some data
+                    visual.onResizing(viewport);
+                    visual.onDataChanged({ dataViews: dataViews });
+                }
+
+            }
+
+            function createDefaultStyles() {
+                var dataColors = new powerbi.visuals.DataColorPalette();
+
+                return {
+                    titleText: {
+                        color: { value: 'rgba(51,51,51,1)' }
+                    },
+                    subTitleText: {
+                        color: { value: 'rgba(145,145,145,1)' }
+                    },
+                    colorPalette: {
+                        dataColors: dataColors,
+                    },
+                    labelText: {
+                        color: {
+                            value: 'rgba(51,51,51,1)',
+                        },
+                        fontSize: '11px'
+                    },
+                    isHighContrast: false,
+                };
+            }
+
+            var pluginService = powerbi.visuals.visualPluginFactory.create();
+            var defaultVisualHostServices = powerbi.visuals.defaultVisualHostServices;
+            var width = 600;
+            var height = 400;
+
+            var element = $('.visual');
+            element.height(height).width(width);
+
+
+            // Get a plugin
+            var visual = pluginService.getPlugin('lineChart').create();
+
+            var dataViewTransform = powerbi.data.DataViewTransform;
+
+            function initializeVisual() {
+                powerbi.visuals.DefaultVisualHostServices.initialize();
+
+                visual.init({
+                    // empty DOM element the visual should attach to.
+                    element: element,
+                    // host services
+                    host: defaultVisualHostServices,
+                    style: createDefaultStyles(),
+                    viewport: {
+                        height: height,
+                        width: width
+                    },
+                    settings: { slicingEnabled: true },
+                    interactivity: { isInteractiveLegend: false, selection: false },
+                    animation: { transitionImmediate: true }
+                });
+            }
+            initializeVisual();
+
+            function ShowGraph() {
+                $.get("/api/SASSensor", {},
+                    function (result) {
+                        CreateGraph(result);
+                    });
+            }
+
+            ShowGraph();
+
             var deviceStatusHub = $.connection.DeviceStatusHub;
             deviceStatusHub.on("Update", function (packet) {
                 var ndid=document.getElementById('notice-device-id');
@@ -44,7 +213,8 @@
                 var nt=document.getElementById('notice-time');
                     ndid.innerHTML=packet.DeviceId;
                 nds.innerHTML=packet.Status;
-                nt.innerHTML=packet.time;
+                nt.innerHTML = packet.time;
+                ShowGraph();
             });
             $.connection.hub.start();
 
@@ -61,12 +231,10 @@
                 <tr><td><div id="notice-device-id"/></td><td><div id="notice-device-status" /></td><td><div id="notice-time" /></td></tr>
             </table>
         </div>
-    <div>
-        <p>Stream Analytics Service Stored Sensor Data</p>
-        <table id="table1" border="1">
-        <tr><th>DeviceId</th><th>AccelX</th><th>AccelY</th><th>AccelZ</th><th>Temperature</th><th>Time</th></tr>
-    </table>
-    </div>
+        <div>
+            <p>Stream Analytics Service Stored Sensor Data</p>
+            <div class="visual"></div>
+        </div>
     </form>
 </body>
 </html>
