@@ -1,5 +1,5 @@
 //#define ACCESS_MOBILE_SERVICE
-//#define ACCESS_IOT_HUB
+#define ACCESS_IOT_HUB
 
 using System;
 using Microsoft.SPOT;
@@ -101,6 +101,9 @@ namespace PinKitIoTHubApp
                                 + ",\"accely\":" + sensorReadings[i].accely
                                 + ",\"accelz\":" + sensorReadings[i].accelz
                                 + ",\"temp\":" + sensorReadings[i].temp
+#if (USE_LIGHTSENSE)
+                                + ",\"brightness\":" + sensorReadings[i].Brightness
+#endif
                                 + ",\"time\":\"" + sensorReadings[i].time.ToString("yyyy-MM-ddThh:mm:ss.fffZ")
                                 + "\",\"msgId\":\"" + sensorReadings[i].deviceId + measuredTime
                                 + "\",\"Latitude\":" + sensorReadings[i].Latitude
@@ -182,7 +185,9 @@ namespace PinKitIoTHubApp
                     sensorReadings[srCount].time = now;
                     sensorReadings[srCount].Latitude = IoTHoLConfig.Latitude;
                     sensorReadings[srCount].Longitude = IoTHoLConfig.Longitude;
-
+#if (USE_LIGHTSENSE)
+                    sensorReadings[srCount].Brightness = pinkit.LightSensor.TakeMeasurement();
+#endif
                     Debug.Print("Measured[" + sendRound + "][" + srCount + "].msgId=" + sensorReadings[srCount].msgId);
                     srCount++;
                 }

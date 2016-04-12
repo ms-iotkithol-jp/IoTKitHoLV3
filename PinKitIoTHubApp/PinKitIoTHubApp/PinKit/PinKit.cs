@@ -14,6 +14,9 @@ namespace PinKit
             accelerometer = new Accelerometer();
             temperature = new Temperature();
             led = new BoardFullColorLED();
+#if (USE_LIGHTSENSE)
+            lightSensor = new LightSensor();
+#endif
         }
 
         private string ipAddress = "";
@@ -163,5 +166,10 @@ namespace PinKit
         private Accelerometer accelerometer;
         private Temperature temperature;
         private BoardFullColorLED led;
+
+#if (USE_LIGHTSENSE)
+        private LightSensor lightSensor;
+        public LightSensor LightSensor { get { return lightSensor; } }        
+#endif
     }
 }

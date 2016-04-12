@@ -33,5 +33,9 @@ namespace PinKitIoTApp.Models
 
         public double Latitude { get; set; }
         public double Longitude { get; set; }
+
+#if (USE_LIGHTSENSE)
+        public double Brightness { get; set; }
+#endif
     }
-}
+    }
