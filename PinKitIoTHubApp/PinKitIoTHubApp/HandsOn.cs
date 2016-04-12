@@ -1,5 +1,5 @@
 //#define ACCESS_MOBILE_SERVICE
-#define ACCESS_IOT_HUB
+//#define ACCESS_IOT_HUB
 
 using System;
 using Microsoft.SPOT;
@@ -104,8 +104,8 @@ namespace PinKitIoTHubApp
 #if (USE_LIGHTSENSE)
                                 + ",\"brightness\":" + sensorReadings[i].Brightness
 #endif
-                                + ",\"time\":\"" + sensorReadings[i].time.ToString("yyyy-MM-ddThh:mm:ss.fffZ")
-                                + "\",\"msgId\":\"" + sensorReadings[i].deviceId + measuredTime
+                                + ",\"time\":\"" + measuredTime
+                                + "\",\"msgId\":\"" + sensorReadings[i].deviceId + (sensorReadings[i].time.Ticks / TimeSpan.TicksPerMillisecond)
                                 + "\",\"Latitude\":" + sensorReadings[i].Latitude
                                 + ",\"Longitude\":" + sensorReadings[i].Longitude
                                 + ",\"deviceId\":\"" + sensorReadings[i].deviceId + "\"}";
