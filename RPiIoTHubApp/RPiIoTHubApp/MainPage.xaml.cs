@@ -47,7 +47,7 @@ namespace RPiIoTHubApp
         // IoT Hub Configuration
         string IoTHubEndpoint = "[IoTHubName].azure-devices.net";
         string DeviceKey = "";
-        bool IoTServiceAvailabled = true;
+        bool IoTServiceAvailabled = false;
 
         int measureIntervalMSec = 1000;
         DispatcherTimer measureTimer;
