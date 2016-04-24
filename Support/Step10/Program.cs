@@ -4,6 +4,7 @@ using System.Linq;
 using System.Text;
 using Microsoft.Azure.WebJobs;
 using Microsoft.Azure;
+using Microsoft.WindowsAzure;
 
 namespace DeviceMonitorWebJob
 {
