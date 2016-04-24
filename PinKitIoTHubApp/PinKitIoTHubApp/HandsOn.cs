@@ -137,8 +137,8 @@ namespace PinKitIoTHubApp
 
         DispatcherTimer measureTimer;
         DispatcherTimer uploadTimer;
-        long measureIntervalMSec = 1000; // measure interval 1000 msec
-        long uploadIntervalMSec = 120000;  // upload interval 1000 msec
+        long measureIntervalMSec = 2000; // measure interval 1000 msec
+        long uploadIntervalMSec = 60000;  // upload interval 1000 msec
 
         private void Initialize()
         {
