@@ -1,0 +1,7 @@
+WITH subquery AS (  
+        SELECT deviceid, time, accelx, accely, accelz, msgId, 
+        prediction(accelx, accely, accelz,deviceId, time) as result from sensor  
+    )
+SELECT deviceId, time, accelx, accely, accelz, msgId,
+    result.[Scored Labels] as PredictedTempStatus, result.[Scored Probabilities] as probability
+    into POutput from subquery;
