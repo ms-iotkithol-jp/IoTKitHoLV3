@@ -205,6 +205,11 @@ namespace PinKitIoTHubApp
             if (mobileService == null)
             {
                 mobileService = new EGIoTKit.Utility.SimpleMobileAppsClient(IoTHoLConfig.DeviceEntryEndPoint);
+                if (proxyHost != null && proxyHost != "")
+                {
+                    mobileService.ProxyHost = proxyHost;
+                    mobileService.ProxyPort = proxyPort;
+                }
             }
             var registered = mobileService.Query(DeviceEntryTableName);
             bool registed = false;
