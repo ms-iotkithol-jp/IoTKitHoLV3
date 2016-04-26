@@ -233,7 +233,7 @@
         </div>
         <div>
             <p>Stream Analytics Service Stored Sensor Data</p>
-            <div class="visual"></div>
+            <div class="visual" style="position:relative"></div>
         </div>
     </form>
 </body>
