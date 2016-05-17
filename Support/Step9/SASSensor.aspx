@@ -8,7 +8,7 @@
     <title>Stored Sensor Data by Stream Analytics</title>
     <link href="visuals.css" rel="stylesheet" />
     <script type="text/javascript" src="Scripts/jquery-1.10.2.min.js" ></script>
-    <script type="text/javascript" src="Scripts/jquery.signalR-2.2.0.min.js"></script>
+    <script type="text/javascript" src="Scripts/jquery.signalR-2.1.2.min.js"></script>
     <script type="text/javascript" src="SignalR/hubs" ></script>
     <script type="text/javascript" src="Scripts/powerbi-visuals.all.min.js"></script>
     <style>
@@ -206,7 +206,7 @@
 
             ShowGraph();
 
-            var deviceStatusHub = $.connection.DeviceStatusHub;
+            var deviceStatusHub = $.connection.deviceStatusHub;
             deviceStatusHub.on("Update", function (packet) {
                 var ndid=document.getElementById('notice-device-id');
                 var nds=document.getElementById('notice-device-status');
