@@ -66,17 +66,18 @@ namespace PinKitIoTHubApp
                     if (on)
                     {
                         pinkit.LED.SetColor(blinkColor);
+                        on = false;
                     }
                     else
                     {
                         pinkit.LED.SetColor(PinKit.BoardFullColorLED.Colors.Black);
+                        on = true;
                     }
                     Thread.Sleep(500);
                     lock (this)
                     {
                         blinkingStatus = blinking;
                     }
-                    on = false;
                 }
             });
             pinkitStatusLEDThread.Start();
