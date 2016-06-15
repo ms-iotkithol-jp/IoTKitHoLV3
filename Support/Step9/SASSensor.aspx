@@ -7,10 +7,10 @@
 <meta http-equiv="Content-Type" content="text/html; charset=utf-8"/>
     <title>Stored Sensor Data by Stream Analytics</title>
     <link href="visuals.css" rel="stylesheet" />
+    <script type="text/javascript" src="Scripts/powerbi-visuals.all.min.js"></script>
     <script type="text/javascript" src="Scripts/jquery-1.10.2.min.js" ></script>
     <script type="text/javascript" src="Scripts/jquery.signalR-2.2.0.min.js"></script>
     <script type="text/javascript" src="SignalR/hubs" ></script>
-    <script type="text/javascript" src="Scripts/powerbi-visuals.all.min.js"></script>
     <style>
         .visual {
             'background-color' : 'white',
