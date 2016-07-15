@@ -1,0 +1,69 @@
+using System;
+
+public static void Run(string myEventHubMessage, TraceWriter log)
+{
+    log.Info($"C# Event Hub trigger function processed a message: {myEventHubMessage}");
+    string json = "";
+    string content = "";
+    using (var textreader = new System.IO.StringReader(myEventHubMessage))
+    {
+         while ((content = textreader.ReadLine()) != null)
+         {
+             if (string.IsNullOrEmpty(json))
+             {
+                 json = "[";
+             }
+             else
+             {
+                  json += ",";
+             }
+             json += content;
+        }
+    }
+    json += "]";
+    try{
+        var deserialized = Newtonsoft.Json.JsonConvert.DeserializeObject<System.Collections.Generic.List<DeviceStatus>>(json);
+        var hubConnection = new Microsoft.AspNet.SignalR.Client.HubConnection("http://[Web-App-Name].azurewebsites.net");
+        var proxy = hubConnection.CreateHubProxy("DeviceStatusHub");
+        hubConnection.Start().Wait();
+        foreach (var item in deserialized)
+        {
+            proxy.Invoke("Update", new[] { item });
+        }
+        if (deserialized.Count() > 0)
+        {
+            var stepHub = new Microsoft.AspNet.SignalR.Client.HubConnection("http://egholservice.azurewebsites.net/");
+            var stepProxy = stepHub.CreateHubProxy("HoLTrackHub");
+            stepHub.Start().Wait();
+            stepProxy.Invoke("Notify", new[] { new IoTKitHolTrackingPacket() {
+                DeviceId =deserialized[0].DeviceId,
+                HolVersion ="V3R1",
+                HolStep ="Step10",
+                Message ="Working" }
+            });
+        }
+    }
+    catch(Exception ex)
+    {
+        log.Info("SignalR Hub Invoke Failed - "+ex.Message);
+    }
+}
+
+public class DeviceStatus
+{
+    public string DeviceId { get; set; }
+    public double tempavg { get; set; }
+    public double accelxavg { get; set; }
+    public double accelyavg { get; set; }
+    public double accelzavg { get; set; }
+    public string Status { get; set; }
+    public DateTime time { get; set; }
+}
+
+public class IoTKitHolTrackingPacket
+{
+    public string DeviceId { get; set; }
+    public string HolVersion { get; set; }
+    public string HolStep { get; set; }
+    public string Message { get; set; }
+}
