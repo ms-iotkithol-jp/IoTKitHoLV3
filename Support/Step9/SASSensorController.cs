@@ -13,7 +13,7 @@ namespace IoTWeb.Controllers
 {
     public class SASSensorController : ApiController
     {
-        public IEnumerable<Models.SASSensorTable> Get()
+        public IEnumerable<Models.SASSensorTable> Get([FromUri]int during=30)
         {
             var storeCS = CloudConfigurationManager.GetSetting("StorageConnectionString");
             var storageAccount = CloudStorageAccount.Parse(storeCS);
@@ -21,7 +21,7 @@ namespace IoTWeb.Controllers
             var sensorReadingTable = tableClient.GetTableReference("SASSensor");
             var query = new TableQuery<Models.SASSensorTable>().Where(
                 TableQuery.GenerateFilterConditionForDate("Timestamp",
- QueryComparisons.GreaterThanOrEqual, DateTimeOffset.Now.AddMonths(-1))
+ QueryComparisons.GreaterThanOrEqual, DateTimeOffset.Now.AddDays(-during))
                 );
             var results = sensorReadingTable.ExecuteQuery(query).
 Select((ent => (Models.SASSensorTable)ent)).ToList();
@@ -44,14 +44,14 @@ Select((ent => (Models.SASSensorTable)ent)).ToList();
  QueryComparisons.GreaterThanOrEqual, DateTimeOffset.Now.AddDays(-duringDay))
                 );
             string[] sensorTypes = { "accelx", "accely", "accelz", "temp" };
-   
+
             DateTime startTime = DateTime.Now;
             DateTime endTime = DateTime.Now.AddDays(-duringDay);
             var dssUnits = new Dictionary<string, Dictionary<string, StatUnit>>();
             var dstatistics = new Dictionary<string, Models.SensorStatisticsPacket>();
             double lastLongitude = 0;
             double lastLatitude = 0;
-            foreach(var sass in sassTable.ExecuteQuery(srQquery))
+            foreach (var sass in sassTable.ExecuteQuery(srQquery))
             {
                 if (!dssUnits.ContainsKey(sass.deviceId))
                 {
@@ -141,3 +141,4 @@ Select((ent => (Models.SASSensorTable)ent)).ToList();
         }
     }
 }
+

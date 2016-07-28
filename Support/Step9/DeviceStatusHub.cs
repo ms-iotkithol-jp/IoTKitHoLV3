@@ -15,6 +15,10 @@ namespace IoTWeb.Hubs
             Clients.All.hello();
         }
 
+        public void Prediction(Models.PredictedDeviceStatus status)
+        {
+            Clients.Others.Prediction(status);
+        }
         public void Update(Models.DeviceStatus status)
         {
             Clients.Others.Update(status);

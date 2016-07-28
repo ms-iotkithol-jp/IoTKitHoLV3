@@ -25,7 +25,19 @@ namespace IoTWeb.Models
         public double accelxavg { get; set; }
         public double accelyavg { get; set; }
         public double accelzavg { get; set; }
-        public string Status { get; set; }
+        public string msgid { get; set; }
+        public DateTime time { get; set; }
+    }
+    
+    public class PredictedDeviceStatus
+    {
+        public string DeviceId { get; set; }
+        public string PredictedTempStatus { get; set; }
+        public double probability { get; set; }
+        public double accelx { get; set; }
+        public double accely { get; set; }
+        public double accelz { get; set; }
+        public string msgid { get; set; }
         public DateTime time { get; set; }
     }
 

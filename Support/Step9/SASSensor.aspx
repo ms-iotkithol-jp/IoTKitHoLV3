@@ -7,10 +7,8 @@
 <meta http-equiv="Content-Type" content="text/html; charset=utf-8"/>
     <title>Stored Sensor Data by Stream Analytics</title>
     <link href="visuals.css" rel="stylesheet" />
-    <script type="text/javascript" src="Scripts/powerbi-visuals.all.min.js"></script>
     <script type="text/javascript" src="Scripts/jquery-1.10.2.min.js" ></script>
-    <script type="text/javascript" src="Scripts/jquery.signalR-2.2.0.min.js"></script>
-    <script type="text/javascript" src="SignalR/hubs" ></script>
+    <script type="text/javascript" src="Scripts/powerbi-visuals.all.min.js"></script>
     <style>
         .visual {
             'background-color' : 'white',
@@ -21,6 +19,7 @@
 
     <script type="text/javascript">
         $(function () {
+            
             var dataOfDevices = [];
             var dataViews = [];
             var columns = [];
@@ -198,26 +197,18 @@
             initializeVisual();
 
             function ShowGraph() {
-                $.get("/api/SASSensor", {},
+                var itemCurrentTime = document.getElementById("id-current-time");
+                var currentTime = new Date();
+                itemCurrentTime.innerHTML = currentTime.toDateString() + " - " + currentTime.toTimeString();
+                $.get("/api/SASSensor?during=1", {},
                     function (result) {
                         CreateGraph(result);
                     });
             }
 
             ShowGraph();
-
-            var deviceStatusHub = $.connection.deviceStatusHub;
-            deviceStatusHub.on("Update", function (packet) {
-                var ndid=document.getElementById('notice-device-id');
-                var nds=document.getElementById('notice-device-status');
-                var nt=document.getElementById('notice-time');
-                    ndid.innerHTML=packet.DeviceId;
-                nds.innerHTML=packet.Status;
-                nt.innerHTML = packet.time;
-                ShowGraph();
-            });
-            $.connection.hub.start();
-
+            // Reload sensor data and redraw graph after 10 min
+            setInterval(ShowGraph, 600000);
         });
     </script>
 </head>
@@ -225,14 +216,8 @@
     <p>SASSensor</p>
     <form id="form1" runat="server">
         <div>
-            <p>Device Sensor Alert</p>
-            <table>
-                <tr><th>DeviceId</th><th>Status</th><th>Time</th></tr>
-                <tr><td><div id="notice-device-id"/></td><td><div id="notice-device-status" /></td><td><div id="notice-time" /></td></tr>
-            </table>
-        </div>
-        <div>
-            <p>Stream Analytics Service Stored Sensor Data</p>
+            <p>Stream Analytics Service Stored Sensor Raw Temperature Data</p>
+            <p><div id="id-current-time"></div></p>
             <div class="visual" style="position:relative"></div>
         </div>
     </form>
