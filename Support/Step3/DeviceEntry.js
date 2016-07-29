@@ -1,13 +1,11 @@
 ﻿$(function () {
-    var mobileAppName = "[Mobile App Name]";
     $.ajax({
-        url: 'http://' + mobileAppName + '.azurewebsites.net/tables/DeviceEntry',
+        url: './tables/DeviceEntry',
         type: 'GET',
         headers: {
             'ZUMO-API-VERSION': '2.0.0'
         },
         success: function (results) {
-
             // Handle update
             $(document.body).on('click', '.item-update', function () {
                 var itemId = getDEItemId(this);
@@ -21,9 +19,26 @@
                 var ihep = elIHEP.value;
                 var elDK = document.getElementById('item-dk-' + itemDevId);
                 var dk = elDK.value;
+                if (elSA.checked) {
+                    if (ihep === "" && dk === "") {
+                        $.ajax({
+                            url: '/api/DeviceManagement',
+                            type: 'GET',
+                            headers: {
+                                'device-id': itemDevId
+                            },
+                            success: function (body) {
+                                elIHEP.value = body.IoTHubEndpoint;
+                                elDK.value = body.DeviceKey;
+                                ihep = body.IoTHubEndpoint;
+                                dk = body.DeviceKey;
+                            }
+                        });
+                    }
+                }
                 var updateEntry = { ServiceAvailable: isServiceAvailable, IoTHubEndpoint: ihep, DeviceKey: dk };
                 $.ajax({
-                    url: 'http://' + mobileAppName + '.azurewebsites.net/tables/DeviceEntry/' + itemId,
+                    url: './tables/DeviceEntry/' + itemId,
                     type: 'PATCH',
                     headers: {
                         'Content-Type': 'application/json',
@@ -60,9 +75,30 @@
                 .append($('<input type="text" class="di-text">').attr('id', 'item-dk-' + item.deviceId).attr('value', item.deviceKey)));
 
         });
-
         $('#device-entries').empty().append(listItems).toggle(listItems.length > 0);
         $('#summary').html('<strong>' + deItems.length + '</strong> entry(s)');
+        deItems.forEach(function (item) {
+            var deviceId = item.deviceId;
+            var elSA = document.getElementById('item-sa-' + deviceId);
+            if (elSA.checked) {
+                var elIHEP = document.getElementById('item-ihep-' + deviceId);
+                var elDK = document.getElementById('item-dk-' + deviceId);
+                if (elIHEP.value === "" && elDK.value === "") {
+                    $.ajax({
+                        url: '/api/DeviceManagement',
+                        type: 'GET',
+                        headers: {
+                            'device-id': deviceId
+                        },
+                        success: function (body) {
+                            elIHEP.value = body.IoTHubEndpoint;
+                            elDK.value = body.DeviceKey;
+                        }
+                    });
+                }
+            }
+        });
+
     }
 
     function handleError(error) {

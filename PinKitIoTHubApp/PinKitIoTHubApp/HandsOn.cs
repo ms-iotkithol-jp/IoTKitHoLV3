@@ -26,7 +26,7 @@ namespace PinKitIoTHubApp
 #if(ACCESS_IOT_HUB) 
         // IoT Hub Configuration
         // string ioTHubEndpoint = "[IoTHubName].azure-devices.net"; -> IoTHubConfig.cs
-        string deviceKey = "";
+//        string deviceKey = "";
 #endif
 
         // Identifier of this board. this value will be set by this app.
@@ -226,8 +226,8 @@ namespace PinKitIoTHubApp
                             if (IoTServiceAvailabled)
                             {
                                 IoTHoLConfig.IoTHubEndpoint = (string)registedEntry["iotHubEndpoint"];
-                                deviceKey = (string)registedEntry["deviceKey"];
-                                Debug.Print("IoT Hub Service Availabled - IoTHubEndpoint=" + IoTHoLConfig.IoTHubEndpoint + ",deviceKey=" + deviceKey);
+                                IoTHoLConfig.DeviceKey = (string)registedEntry["deviceKey"];
+                                Debug.Print("IoT Hub Service Availabled - IoTHubEndpoint=" + IoTHoLConfig.IoTHubEndpoint + ",deviceKey=" + IoTHoLConfig.DeviceKey);
                             }
                         }
                         registed = true;
@@ -274,7 +274,7 @@ namespace PinKitIoTHubApp
         private void SetupIoTHub()
         {
 #if (ACCESS_IOT_HUB)
-            iotHubConnectionString = "HostName=" + IoTHoLConfig.IoTHubEndpoint + ";DeviceId=" + deviceId + ";SharedAccessKey=" + deviceKey;
+            iotHubConnectionString = "HostName=" + IoTHoLConfig.IoTHubEndpoint + ";DeviceId=" + deviceId + ";SharedAccessKey=" + IoTHoLConfig.DeviceKey;
             try
             {
                 deviceClient = DeviceClient.CreateFromConnectionString(iotHubConnectionString, TransportType.Http1);
