@@ -135,7 +135,7 @@ namespace RPiIoTHubApp
             var now = DateTime.Now;
             var sensorReading = new Models.SensorReading()
             {
-                msgId = deviceId.ToString() + now.ToString("yyyyMMddhhmmssfff")
+                msgId = deviceId.ToString() + now.ToString("yyyyMMddHHmmssfff")
             };
             lock (this)
             {

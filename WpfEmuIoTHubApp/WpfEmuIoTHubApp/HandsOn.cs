@@ -100,7 +100,7 @@ namespace WpfEmuIoTHubApp
                 var now = DateTime.Now;
                 var sensorReading = new Models.SensorReading()
                 {
-                    msgId = IoTHoLConfig.deviceId.ToString() + now.ToString("yyyyMMddhhmmssfff")
+                    msgId = IoTHoLConfig.deviceId.ToString() + now.ToString("yyyyMMddHHmmssfff")
                 };
                 lock (this)
                 {

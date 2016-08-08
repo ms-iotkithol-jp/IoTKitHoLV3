@@ -96,7 +96,7 @@ namespace PinKitIoTHubApp
                     {
                         if (sensorReadings[i] != null)
                         {
-                            var measuredTime = sensorReadings[i].time.ToString("yyyy-MM-ddThh:mm:ss.fffZ");
+                            var measuredTime = sensorReadings[i].time.ToString("yyyy-MM-ddTHH:mm:ss.fffZ");
                             var srjson = "{\"accelx\":" + sensorReadings[i].accelx
                                 + ",\"accely\":" + sensorReadings[i].accely
                                 + ",\"accelz\":" + sensorReadings[i].accelz
@@ -181,7 +181,7 @@ namespace PinKitIoTHubApp
                     sensorReadings[srCount].accely = accel.Y;
                     sensorReadings[srCount].accelz = accel.Z;
                     sensorReadings[srCount].deviceId = this.deviceId;
-                    sensorReadings[srCount].msgId = deviceId.ToString() + now.ToString("yyyyMMddhhmmssfff");
+                    sensorReadings[srCount].msgId = deviceId.ToString() + now.ToString("yyyyMMddHHmmssfff");
                     sensorReadings[srCount].time = now;
                     sensorReadings[srCount].Latitude = IoTHoLConfig.Latitude;
                     sensorReadings[srCount].Longitude = IoTHoLConfig.Longitude;

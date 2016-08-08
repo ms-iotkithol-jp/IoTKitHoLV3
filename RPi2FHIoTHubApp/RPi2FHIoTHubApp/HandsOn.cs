@@ -250,7 +250,7 @@ namespace RPi2FHIoTHubApp
                 {
                     var sensorReading = new Models.SensorReading()
                     {
-                        msgId = deviceId.ToString() + currentReadings[count].Timestamp.ToString("yyyyMMddhhmmssfff"),
+                        msgId = deviceId.ToString() + currentReadings[count].Timestamp.ToString("yyyyMMddHHmmssfff"),
                         accelx = currentReadings[count].AccelX,
                         accely = currentReadings[count].AccelY,
                         accelz = currentReadings[count].AccelZ,
