@@ -31,9 +31,7 @@ namespace WpfEmuIoTHubApp
         double Latitude = 35.62661;
         double Longitude = 139.740987;
 
-        // IoT Hub Configuration
-        string IoTHubEndpoint = "";
-        string DeviceKey = "";
+        // IoT Hub Sending Service
         bool IoTServiceAvailabled = false;
 
         bool TryConnect()
@@ -136,7 +134,7 @@ namespace WpfEmuIoTHubApp
         void SetupIoTHub()
         {
 #if (ACCESS_IOT_HUB)
-            iotHubConnectionString = "HostName=" + IoTHubEndpoint + ";DeviceId=" +IoTHoLConfig.deviceId + ";SharedAccessKey=" + DeviceKey;
+            iotHubConnectionString = "HostName=" + IoTHoLConfig.IoTHubEndpoint + ";DeviceId=" +IoTHoLConfig.deviceId + ";SharedAccessKey=" + IoTHoLConfig.DeviceKey;
             try {
                 deviceClient = DeviceClient.CreateFromConnectionString(iotHubConnectionString, Microsoft.Azure.Devices.Client.TransportType.Amqp);
                 Debug.Write("IoT Hub Connected.");

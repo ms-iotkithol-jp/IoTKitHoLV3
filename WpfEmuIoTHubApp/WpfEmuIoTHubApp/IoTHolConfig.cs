@@ -14,6 +14,8 @@ namespace WpfEmuIoTHubApp
 
         // Identifier of this board. this value will be set by this app.
         public static Guid deviceId = new Guid(/* Your Guid */);
+        // Security Token for IoT Hub
+        public static string DeviceKey = "";
 
         // Location 
         public static double? Latitude = 35.62661;
