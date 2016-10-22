@@ -10,5 +10,12 @@ at the top of Azure IoT SDK directory.
 
 > cd ./c/  
 > build_all/linux/build.sh --skip-unittests  
-> cd ./c/iotsdk_linux/iothub_client/samples/iotkithol_sample_http  
+> cd ./c/cmake/iotsdk_linux/iothub_client/samples/iotkithol_sample_http  
 > ./iotkithol_sample_http
+
+or 
+
+> cd ./c/cmake/iotsdk_linux/iothub_client/samples/raspbberrypi_photoupload  
+> ./raspbberrypi_photoupload
+
+Please see <https://doc.co/mtf3bT/NsXXfD> and <http://aka.ms/IoTKitHoLV3On>
