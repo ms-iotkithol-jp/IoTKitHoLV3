@@ -55,8 +55,8 @@ static void handle_control_c(GMainLoop* loop);
 
 typedef struct EVENT_INSTANCE_TAG
 {
-    IOTHUB_MESSAGE_HANDLE messageHandle;
-    int messageTrackingId;  // For tracking the messages within the user callback.
+	IOTHUB_MESSAGE_HANDLE messageHandle;
+	int messageTrackingId;  // For tracking the messages within the user callback.
 } EVENT_INSTANCE;
 
 typedef struct IoTKitHoLContext_tag {
@@ -64,66 +64,66 @@ typedef struct IoTKitHoLContext_tag {
 	void* messageLoop;
 } IoTKitHoLContext;
 
-double lastAccelX=0.0;
-double lastAccelY=0.0;
-double lastAccelZ=0.0;
-double lastTemperature=0.0;
+double lastAccelX = 0.0;
+double lastAccelY = 0.0;
+double lastAccelZ = 0.0;
+double lastTemperature = 0.0;
 
 static IOTHUBMESSAGE_DISPOSITION_RESULT ReceiveMessageCallback(IOTHUB_MESSAGE_HANDLE message, void* userContextCallback)
 {
-    int* counter = (int*)userContextCallback;
-    const char* buffer;
-    size_t size;
-    MAP_HANDLE mapProperties;
+	int* counter = (int*)userContextCallback;
+	const char* buffer;
+	size_t size;
+	MAP_HANDLE mapProperties;
 
-    if (IoTHubMessage_GetByteArray(message, (const unsigned char**)&buffer, &size) != IOTHUB_MESSAGE_OK)
-    {
-        printf("unable to retrieve the message data\r\n");
-    }
-    else
-    {
-        (void)printf("Received Message [%d] with Data: <<<%.*s>>> & Size=%d\r\n", *counter, (int)size, buffer, (int)size);
-        if (memcmp(buffer, "quit", size) == 0)
-        {
-            g_continueRunning = false;
-        }
-    }
+	if (IoTHubMessage_GetByteArray(message, (const unsigned char**)&buffer, &size) != IOTHUB_MESSAGE_OK)
+	{
+		printf("unable to retrieve the message data\r\n");
+	}
+	else
+	{
+		(void)printf("Received Message [%d] with Data: <<<%.*s>>> & Size=%d\r\n", *counter, (int)size, buffer, (int)size);
+		if (memcmp(buffer, "quit", size) == 0)
+		{
+			g_continueRunning = false;
+		}
+	}
 
-    // Retrieve properties from the message
-    mapProperties = IoTHubMessage_Properties(message);
-    if (mapProperties != NULL)
-    {
-        const char*const* keys;
-        const char*const* values;
-        size_t propertyCount = 0;
-        if (Map_GetInternals(mapProperties, &keys, &values, &propertyCount) == MAP_OK)
-        {
-            if (propertyCount > 0)
-            {
-                size_t index;
+	// Retrieve properties from the message
+	mapProperties = IoTHubMessage_Properties(message);
+	if (mapProperties != NULL)
+	{
+		const char*const* keys;
+		const char*const* values;
+		size_t propertyCount = 0;
+		if (Map_GetInternals(mapProperties, &keys, &values, &propertyCount) == MAP_OK)
+		{
+			if (propertyCount > 0)
+			{
+				size_t index;
 
-                printf("Message Properties:\r\n");
-                for (index = 0; index < propertyCount; index++)
-                {
-                    printf("\tKey: %s Value: %s\r\n", keys[index], values[index]);
-                }
-                printf("\r\n");
-            }
-        }
-    }
+				printf("Message Properties:\r\n");
+				for (index = 0; index < propertyCount; index++)
+				{
+					printf("\tKey: %s Value: %s\r\n", keys[index], values[index]);
+				}
+				printf("\r\n");
+			}
+		}
+	}
 
-    /* Some device specific action code goes here... */
-    (*counter)++;
-    return IOTHUBMESSAGE_ACCEPTED;
+	/* Some device specific action code goes here... */
+	(*counter)++;
+	return IOTHUBMESSAGE_ACCEPTED;
 }
 
 static void SendConfirmationCallback(IOTHUB_CLIENT_CONFIRMATION_RESULT result, void* userContextCallback)
 {
-    EVENT_INSTANCE* eventInstance = (EVENT_INSTANCE*)userContextCallback;
-    (void)printf("Confirmation[%d] received for message tracking id = %d with result = %s\r\n", callbackCounter, eventInstance->messageTrackingId, ENUM_TO_STRING(IOTHUB_CLIENT_CONFIRMATION_RESULT, result));
-    /* Some device specific action code goes here... */
-    callbackCounter++;
-    IoTHubMessage_Destroy(eventInstance->messageHandle);
+	EVENT_INSTANCE* eventInstance = (EVENT_INSTANCE*)userContextCallback;
+	(void)printf("Confirmation[%d] received for message tracking id = %d with result = %s\r\n", callbackCounter, eventInstance->messageTrackingId, ENUM_TO_STRING(IOTHUB_CLIENT_CONFIRMATION_RESULT, result));
+	/* Some device specific action code goes here... */
+	callbackCounter++;
+	IoTHubMessage_Destroy(eventInstance->messageHandle);
 	free(eventInstance);
 }
 
@@ -171,6 +171,9 @@ char currentTime[32];
 static gboolean on_timer_measure(gpointer user_data)
 {
 	IoTKitHoLContext* context = (IoTKitHoLContext*)user_data;
+
+	// please impelement sensor measure implementation here.
+
 	lastAccelX = averageAccelX + (50.0 - (double)(rand() % 100)) / 500.0;
 	lastAccelY = averageAccelY + (50.0 - (double)(rand() % 100)) / 500.0;
 	lastAccelZ = averageAccelZ + (50.0 - (double)(rand() % 100)) / 500.0;
@@ -178,22 +181,40 @@ static gboolean on_timer_measure(gpointer user_data)
 
 	time_t now;
 	struct tm *local;
+	//	struct timespec mlocal;
+	//	clock_gettime(CLOCK_REALTIME, &mlocal);
+
 	now = time(NULL);
 	local = localtime(&now);
+	//	local = localtime(&mlocal.tv_sec);
 
-	sprintf(currentTime, "%04d%02d%02d%02d%02d%02d", local->tm_year + 1900, local->tm_mon + 1, local->tm_mday, local->tm_hour, local->tm_min, local->tm_sec);
+	sprintf(currentTime, "%04d-%02d-%02dT%02d:%02d:%02dZ", local->tm_year + 1900, local->tm_mon + 1, local->tm_mday, local->tm_hour, local->tm_min, local->tm_sec);
+
+	printf("measured!\r\n");
+
+	return TRUE;
 }
 
 static gboolean on_timer_upload(gpointer user_data)
 {
 	IoTKitHoLContext* context = (IoTKitHoLContext*)user_data;
+	time_t now;
+	struct tm *local;
+	now = time(NULL);
+	local = localtime(&now);
 
-	sprintf(msgText, "{\"deviceId\":\"%s\",\"msgId\":\"%s%s\",\"time\":\"%s\",\"accelx\":%f,\"accely\":%f,\"accelz\":%f,\"temp\":%f", deviceId, deviceId, currentTime, currentTime, lastAccelX, lastAccelY, lastAccelZ, lastTemperature);
+	// modifiy here when you want to send more sensors
+	sprintf(msgText, "{\"deviceId\":\"%s\",\"msgId\":\"%s%04d%02d%02d%02d%02d%02d\",\"time\":\"%s\",\"accelx\":%f,\"accely\":%f,\"accelz\":%f,\"temp\":%f",
+		deviceId, deviceId,
+		local->tm_year + 1900, local->tm_mon + 1, local->tm_mday, local->tm_hour, local->tm_min, local->tm_sec,
+		currentTime, lastAccelX, lastAccelY, lastAccelZ, lastTemperature);
 	SendMessageToIoTHub(context->iotHubClientHandle, msgText);
+
+	return TRUE;
 }
 
-int upload_duration_msec = 2000;
-int measure_duration_msec = 1000;
+int upload_duration_msec = 5000;	// upload data each 5 sec;
+int measure_duration_msec = 1000;	// measure data each 1 sec
 guint upload_timer_id;
 guint measure_timer_id;
 
@@ -219,64 +240,64 @@ void start_timers(IoTKitHoLContext* context)
 void iotkithol_sample_http_http_run(void* messageLoop)
 {
 	IoTKitHoLContext iotKitHoLContext;
-    IOTHUB_CLIENT_LL_HANDLE iotHubClientHandle;
+	IOTHUB_CLIENT_LL_HANDLE iotHubClientHandle;
 
 	iotKitHoLContext.messageLoop = messageLoop;
 
 	EVENT_INSTANCE messages[MESSAGE_COUNT];
-    double avgWindSpeed = 10.0;
-    int receiveContext = 0;
-    g_continueRunning = true;
+	double avgWindSpeed = 10.0;
+	int receiveContext = 0;
+	g_continueRunning = true;
 
-    srand((unsigned int)time(NULL));
+	srand((unsigned int)time(NULL));
 
-    callbackCounter = 0;
+	callbackCounter = 0;
 
-    if (platform_init() != 0)
-    {
-        printf("Failed to initialize the platform.\r\n");
-    }
-    else
-    {
-        (void)printf("Starting the IoTHub client sample HTTP...\r\n");
+	if (platform_init() != 0)
+	{
+		printf("Failed to initialize the platform.\r\n");
+	}
+	else
+	{
+		(void)printf("Starting the IoTHub client sample HTTP - %s\r\n", connectionString);
 
-        if ((iotHubClientHandle = IoTHubClient_LL_CreateFromConnectionString(connectionString, HTTP_Protocol)) == NULL)
-        {
-            (void)printf("ERROR: iotHubClientHandle is NULL!\r\n");
-        }
-        else
-        {
+		if ((iotHubClientHandle = IoTHubClient_LL_CreateFromConnectionString(connectionString, HTTP_Protocol)) == NULL)
+		{
+			(void)printf("ERROR: iotHubClientHandle is NULL!\r\n");
+		}
+		else
+		{
 			iotKitHoLContext.iotHubClientHandle = iotHubClientHandle;
-	
-            unsigned int timeout = 241000;
-            // Because it can poll "after 9 seconds" polls will happen effectively // at ~10 seconds.
-            // Note that for scalabilty, the default value of minimumPollingTime
-            // is 25 minutes. For more information, see:
-            // https://azure.microsoft.com/documentation/articles/iot-hub-devguide/#messaging
-            unsigned int minimumPollingTime = 9;
-            if (IoTHubClient_LL_SetOption(iotHubClientHandle, "timeout", &timeout) != IOTHUB_CLIENT_OK)
-            {
-                printf("failure to set option \"timeout\"\r\n");
-            }
 
-            if (IoTHubClient_LL_SetOption(iotHubClientHandle, "MinimumPollingTime", &minimumPollingTime) != IOTHUB_CLIENT_OK)
-            {
-                printf("failure to set option \"MinimumPollingTime\"\r\n");
-            }
+			unsigned int timeout = 241000;
+			// Because it can poll "after 9 seconds" polls will happen effectively // at ~10 seconds.
+			// Note that for scalabilty, the default value of minimumPollingTime
+			// is 25 minutes. For more information, see:
+			// https://azure.microsoft.com/documentation/articles/iot-hub-devguide/#messaging
+			unsigned int minimumPollingTime = 9;
+			if (IoTHubClient_LL_SetOption(iotHubClientHandle, "timeout", &timeout) != IOTHUB_CLIENT_OK)
+			{
+				printf("failure to set option \"timeout\"\r\n");
+			}
+
+			if (IoTHubClient_LL_SetOption(iotHubClientHandle, "MinimumPollingTime", &minimumPollingTime) != IOTHUB_CLIENT_OK)
+			{
+				printf("failure to set option \"MinimumPollingTime\"\r\n");
+			}
 
 #ifdef MBED_BUILD_TIMESTAMP
-            // For mbed add the certificate information
-            if (IoTHubClient_LL_SetOption(iotHubClientHandle, "TrustedCerts", certificates) != IOTHUB_CLIENT_OK)
-            {
-                printf("failure to set option \"TrustedCerts\"\r\n");
-            }
+			// For mbed add the certificate information
+			if (IoTHubClient_LL_SetOption(iotHubClientHandle, "TrustedCerts", certificates) != IOTHUB_CLIENT_OK)
+			{
+				printf("failure to set option \"TrustedCerts\"\r\n");
+			}
 #endif // MBED_BUILD_TIMESTAMP
 
-            /* Setting Message call back, so we can receive Commands. */
-            if (IoTHubClient_LL_SetMessageCallback(iotHubClientHandle, ReceiveMessageCallback, &receiveContext) != IOTHUB_CLIENT_OK)
-            {
-                (void)printf("ERROR: IoTHubClient_LL_SetMessageCallback..........FAILED!\r\n");
-            }
+			/* Setting Message call back, so we can receive Commands. */
+			if (IoTHubClient_LL_SetMessageCallback(iotHubClientHandle, ReceiveMessageCallback, &receiveContext) != IOTHUB_CLIENT_OK)
+			{
+				(void)printf("ERROR: IoTHubClient_LL_SetMessageCallback..........FAILED!\r\n");
+			}
 			else
 			{
 				(void)printf("IoTHubClient_LL_SetMessageCallback...successful.\r\n");
@@ -287,10 +308,10 @@ void iotkithol_sample_http_http_run(void* messageLoop)
 			// run the glib loop
 			g_main_loop_run(messageLoop);
 
-            IoTHubClient_LL_Destroy(iotHubClientHandle);
-        }
-        platform_deinit();
-    }
+			IoTHubClient_LL_Destroy(iotHubClientHandle);
+		}
+		platform_deinit();
+	}
 }
 
 void* start_message_loop()
@@ -302,8 +323,8 @@ void* start_message_loop()
 
 int main(void)
 {
-    iotkithol_sample_http_http_run(start_message_loop());
-    return 0;
+	iotkithol_sample_http_http_run(start_message_loop());
+	return 0;
 }
 
 static void handle_control_c(GMainLoop* loop)
