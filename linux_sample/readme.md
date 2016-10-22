@@ -5,6 +5,5 @@ Add add_CMakeList.txt descriptions at bottom of c/iothub_client/samples/CMakeLis
 
 at the top of Azure IoT SDK directory.
 
-cd c/
-
-build_all/linux/build.sh
+> cd c/
+> build_all/linux/build.sh
