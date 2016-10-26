@@ -103,6 +103,7 @@ namespace WpfEmuIoTHubApp
                 lock (this)
                 {
                     sensorReading.deviceId = IoTHoLConfig.deviceId.ToString();
+                    sensorReading.temp = lastTemperature;
                     sensorReading.accelx = lastAccelX;
                     sensorReading.accely = lastAccelY;
                     sensorReading.accelz = lastAccelZ;
