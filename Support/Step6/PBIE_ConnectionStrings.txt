@@ -1,0 +1,4 @@
+    <add key="powerbi:AccessKey" value="[access-key] />
+    <add key="powerbi:ApiUrl" value="https://api.powerbi.com" />
+    <add key="powerbi:WorkspaceCollection" value="[workspace-collection-name" />
+    <add key="powerbi:WorkspaceId" value="[workspace-id]" />
