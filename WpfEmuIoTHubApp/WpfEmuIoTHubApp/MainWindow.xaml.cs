@@ -32,13 +32,13 @@ namespace WpfEmuIoTHubApp
 
         void MainWindow_Loaded(object sender, RoutedEventArgs e)
         {
-            if (Guid.Empty == deviceId)
+            if (Guid.Empty == IoTHoLConfig.deviceId)
             {
                 MessageBox.Show("Please set valid deviceId before you learn!");
                 throw new ArgumentOutOfRangeException("deviceId is empty!");
             }
-            txtDeviceId.Text = deviceId.ToString();
-            txtMSEndPoint.Text = DeviceEntryEndPoint;
+            txtDeviceId.Text = IoTHoLConfig.deviceId.ToString();
+            txtMSEndPoint.Text = IoTHoLConfig.DeviceEntryEndPoint;
 
             try
             {
