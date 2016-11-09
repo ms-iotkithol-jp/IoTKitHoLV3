@@ -1,0 +1,63 @@
+﻿<Page
+    x:Class="WinIoTCoreTIIoTHubApp.MainPage"
+    xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
+    xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+    xmlns:local="using:WinIoTCoreTIIoTHubApp"
+    xmlns:d="http://schemas.microsoft.com/expression/blend/2008"
+    xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
+    Width="800"
+    Height="640"
+    mc:Ignorable="d">
+
+    <Grid Background="{ThemeResource ApplicationPageBackgroundThemeBrush}">
+        <Grid.ColumnDefinitions>
+            <ColumnDefinition/>
+            <ColumnDefinition/>
+        </Grid.ColumnDefinitions>
+        <Grid>
+            <Grid.RowDefinitions>
+                <RowDefinition Height="80"/>
+                <RowDefinition/>
+                <RowDefinition/>
+            </Grid.RowDefinitions>
+            <TextBlock Text="Windows 10 IoT Core" FontSize="20" Margin="10"/>
+            <TextBlock Text="with TI Sensor" FontSize="20" HorizontalAlignment="Left" VerticalAlignment="Bottom" Margin="10"/>
+            <TextBlock Grid.Column="0" x:Name="tbSendStatus" Grid.Row="2" FontSize="20"/>
+            <TextBlock Grid.Column="0" x:Name="tbReceiveStats" Grid.Row="3" FontSize="20"/>
+        </Grid>
+        <Grid Grid.Column="1">
+            <Grid.RowDefinitions>
+                <RowDefinition/>
+                <RowDefinition/>
+                <RowDefinition/>
+                <RowDefinition/>
+                <RowDefinition/>
+                <RowDefinition/>
+                <RowDefinition/>
+                <RowDefinition/>
+                <RowDefinition/>
+            </Grid.RowDefinitions>
+            <Grid.ColumnDefinitions>
+                <ColumnDefinition/>
+                <ColumnDefinition/>
+            </Grid.ColumnDefinitions>
+            <TextBlock Text="SensorType" FontSize="20"/>
+            <TextBlock Grid.Column="1" x:Name="tbSensorType" FontSize="20" HorizontalAlignment="Right" VerticalAlignment="Bottom" Margin="10"/>
+            <TextBlock Text="Connection Status" FontSize="20" Grid.Row="1"/>
+            <TextBlock Grid.Column="1" x:Name="tbConnStatus" Grid.Row="1" FontSize="20"/>
+            <TextBlock Text="Device Id" FontSize="20" Grid.Row="2"/>
+            <TextBlock Grid.Column="1" x:Name="tbDeviceId" Grid.Row="2"/>
+            <TextBlock Text="Sensor Measurment" Grid.Row="3" Grid.ColumnSpan="2" FontSize="20"/>
+            <TextBlock Text="Acceleromter" FontSize="20" Grid.Row="4"/>
+            <TextBlock Grid.ColumnSpan="2" Grid.Row="4" x:Name="tbAccel" VerticalAlignment="Bottom" Margin="10"/>
+            <TextBlock Text="Temperature" FontSize="20" Grid.Row="5"/>
+            <TextBlock Grid.ColumnSpan="2" Grid.Row="5" x:Name="tbTemp" VerticalAlignment="Bottom" Margin="10"/>
+            <TextBlock Text="Humidity" FontSize="20" Grid.Row="6"/>
+            <TextBlock Grid.ColumnSpan="2" Grid.Row="6" x:Name="tbHum" VerticalAlignment="Bottom" Margin="10"/>
+            <TextBlock Text="Pressure" FontSize="20" Grid.Row="7"/>
+            <TextBlock Grid.ColumnSpan="2" Grid.Row="7" x:Name="tbPress" VerticalAlignment="Bottom" Margin="10"/>
+            <TextBlock Text="Switch" FontSize="20" Grid.Row="8"/>
+            <TextBlock Grid.ColumnSpan="2" Grid.Row="8" x:Name="tbSwitch" VerticalAlignment="Bottom" Margin="10"/>
+        </Grid>
+    </Grid>
+</Page>
