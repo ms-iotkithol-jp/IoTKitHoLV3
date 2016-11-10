@@ -8,11 +8,19 @@ using System.Text;
 using System.Threading.Tasks;
 using Windows.UI.Xaml;
 
+#if (ACCESS_MOBILE_SERVICE)
+using Microsoft.WindowsAzure.MobileServices;
+#endif
+#if (ACCESS_IOT_HUB)
+using Microsoft.Azure.Devices.Client;
+using Newtonsoft.Json;
+#endif
+
 namespace WinIoTCoreTIIoTHubApp
 {
     public partial class MainPage
     {
-        bool IoTServiceAvailabled = false;
+        bool IoTServiceAvailabled = true;
         TISensorTagLibrary.SensorTag sensorTag = TISensorTagLibrary.SensorTag.CC2541;
 
         async Task<bool> TryConnect()
@@ -166,8 +174,7 @@ namespace WinIoTCoreTIIoTHubApp
                 catch (Exception ex)
                 {
                     Debug.WriteLine(ex.Message);
-                    IndicateDebug(GIS.FEZHAT.Color.Red, 3600);
-                }
+               }
                 await Task.Delay(TimeSpan.FromSeconds(10));
             }
         }
@@ -186,7 +193,6 @@ namespace WinIoTCoreTIIoTHubApp
                         AccelY = r.AccelY,
                         AccelZ = r.AccelZ,
                         Temperature = r.Temperature,
-                        Brightness = r.Brightness,
                         Timestamp = r.Timestamp
                     });
                 }
@@ -219,12 +225,10 @@ namespace WinIoTCoreTIIoTHubApp
 
                 await deviceClient.SendEventAsync(eventMessage);
                 tbSendStatus.Text = "Send[" + sendCount++ + "]@" + DateTime.Now.ToString();
-                IndicateDebug(GIS.FEZHAT.Color.Blue, 10);
             }
             catch (Exception ex)
             {
                 Debug.Write(ex.Message);
-                IndicateDebug(GIS.FEZHAT.Color.Yellow, 3600);
             }
 #endif
         }
