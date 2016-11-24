@@ -3,7 +3,7 @@
     {
         string IoTHubEndpoint = "[IoT Hub Endpoint]";
         string RegistryRWKey = "[Registry Read/Write Key]";
-        public async Task< DeviceRegistration> Get()
+        public async Task<DeviceRegistration> Get()
         {
             var dr = new DeviceRegistration()
             {
@@ -21,17 +21,21 @@
                 try
                 {
                     device = await registryManager.GetDeviceAsync(deviceId);
+                    if (device == null)
+                    {
+                        device = new Microsoft.Azure.Devices.Device(deviceId);
+                        device = await registryManager.AddDeviceAsync(device);
+                    }
+                    if (device != null)
+                    {
+                        dr.DeviceKey = device.Authentication.SymmetricKey.PrimaryKey;
+                        dr.IoTHubEndpoint = IoTHubEndpoint;
+                    }
                     dr.HasRegisted = true;
                 }
-                catch(Exception ex)
+                catch (Exception ex)
                 {
-                    device = new Microsoft.Azure.Devices.Device(deviceId);
-                    device=await registryManager.AddDeviceAsync(device);
-                }
-                if (device != null)
-                {
-                    dr.DeviceKey = device.Authentication.SymmetricKey.PrimaryKey;
-                    dr.IoTHubEndpoint = IoTHubEndpoint;
+                    Debug.WriteLine(ex.Message);
                 }
                 await registryManager.CloseAsync();
 

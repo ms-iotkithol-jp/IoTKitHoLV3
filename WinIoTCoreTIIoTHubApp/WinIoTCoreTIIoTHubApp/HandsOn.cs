@@ -80,8 +80,6 @@ namespace WinIoTCoreTIIoTHubApp
                 {
                     DeviceId = deviceId.ToString(),
                     ServiceAvailable = false,
-                    IoTHubEndpoint = MSIoTKiTHoLJP.IoTHoLConfig.IoTHubEndpoint,
-                    DeviceKey = MSIoTKiTHoLJP.IoTHoLConfig.DeviceKey
                 };
                 await table.InsertAsync(entry);
             }

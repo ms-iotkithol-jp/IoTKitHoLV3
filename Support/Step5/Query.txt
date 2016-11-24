@@ -1,10 +1,10 @@
-SELECT * INTO ThrOutput FROM sensor;
+SELECT * INTO ThrOutput FROM sensor  TIMESTAMP BY time;
 
 SELECT deviceId as deviceId, time as time, accelx, accely, accelz, msgId,
 CASE WHEN temp>30.0 THEN 'HoT'  ELSE 'Cold' END as TempStatus
-INTO MLOutput FROM sensor
+INTO MLOutput FROM sensor  TIMESTAMP BY time
 
 SELECT deviceId as deviceId, msgId, time as time, Avg(temp) as tempAvg,
 Avg(accelx) as accelxAvg, Avg(accely) as accelyAvg, Avg(accelz) as accelzAvg
-INTO ALOutput FROM sensor
+INTO ALOutput FROM sensor  TIMESTAMP BY time
 GROUP BY TUMBLINGWINDOW (second,15), time, deviceId, msgId;

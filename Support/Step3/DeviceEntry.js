@@ -5,6 +5,7 @@
         headers: {
             'ZUMO-API-VERSION': '2.0.0'
         },
+
         success: function (results) {
             // Handle update
             $(document.body).on('click', '.item-update', function () {
@@ -32,24 +33,25 @@
                                 elDK.value = body.DeviceKey;
                                 ihep = body.IoTHubEndpoint;
                                 dk = body.DeviceKey;
+
+                                var updateEntry = { ServiceAvailable: isServiceAvailable, IoTHubEndpoint: ihep, DeviceKey: dk };
+                                $.ajax({
+                                    url: './tables/DeviceEntry/' + itemId,
+                                    type: 'PATCH',
+                                    headers: {
+                                        'Content-Type': 'application/json',
+                                        'ZUMO-API-VERSION': '2.0.0'
+                                    },
+                                    data: JSON.stringify(updateEntry),
+                                    dataType: 'json',
+                                    success: function (body) {
+                                        var result = body;
+                                    }
+                                });
                             }
                         });
                     }
                 }
-                var updateEntry = { ServiceAvailable: isServiceAvailable, IoTHubEndpoint: ihep, DeviceKey: dk };
-                $.ajax({
-                    url: './tables/DeviceEntry/' + itemId,
-                    type: 'PATCH',
-                    headers: {
-                        'Content-Type': 'application/json',
-                        'ZUMO-API-VERSION': '2.0.0'
-                    },
-                    data: JSON.stringify(updateEntry),
-                    dataType: 'json',
-                    success: function (body) {
-                        var result = body;
-                    }
-                });
             });
 
             // On initial load, start by fetching the current data

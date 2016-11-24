@@ -1,13 +1,23 @@
 using System;
+using System.Collections.Generic;
 
 namespace WinIoTCoreTIIoTHubApp.Models
 {
+    public class SensorValue
+    {
+        public string Type { get; set; }
+        public string Value { get; set; }
+    }
+
     public class SensorReading
     {
         /// <summary>
         /// Device Id
         /// </summary>
         public string deviceId { get; set; }
+#if false
+        public List<SensorValue> SensorValues { get; set; }
+#else
         /// <summary>
         /// Temperature
         /// </summary>
@@ -24,6 +34,10 @@ namespace WinIoTCoreTIIoTHubApp.Models
         /// Acceleration Z
         /// </summary>
         public double accelz { get; set; }
+        /// <summary>
+        /// Measured Time
+        /// </summary>
+#endif
         /// <summary>
         /// Measured Time
         /// </summary>
