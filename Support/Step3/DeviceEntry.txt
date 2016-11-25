@@ -5,4 +5,5 @@
         public bool ServiceAvailable { get; set; }
         public string IoTHubEndpoint { get; set; }
         public string DeviceKey { get; set; }
+        public string ReadWriteKey { get; set; }
     }

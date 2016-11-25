@@ -5,7 +5,6 @@
         headers: {
             'ZUMO-API-VERSION': '2.0.0'
         },
-
         success: function (results) {
             // Handle update
             $(document.body).on('click', '.item-update', function () {
@@ -20,13 +19,17 @@
                 var ihep = elIHEP.value;
                 var elDK = document.getElementById('item-dk-' + itemDevId);
                 var dk = elDK.value;
+                var elRWK = document.getElementById('item-rwk-' + itemDevId);
+                var rwk = elRWK.value;
                 if (elSA.checked) {
-                    if (ihep === "" && dk === "") {
+                    if (dk === "") {
                         $.ajax({
                             url: '/api/DeviceManagement',
                             type: 'GET',
                             headers: {
-                                'device-id': itemDevId
+                                'device-id': itemDevId,
+                                'iothub-endpoint': ihep,
+                                'readwrite-key' :rwk
                             },
                             success: function (body) {
                                 elIHEP.value = body.IoTHubEndpoint;
@@ -34,7 +37,7 @@
                                 ihep = body.IoTHubEndpoint;
                                 dk = body.DeviceKey;
 
-                                var updateEntry = { ServiceAvailable: isServiceAvailable, IoTHubEndpoint: ihep, DeviceKey: dk };
+                                var updateEntry = { ServiceAvailable: isServiceAvailable, IoTHubEndpoint: ihep, DeviceKey: dk, ReadWriteKey: rwk };
                                 $.ajax({
                                     url: './tables/DeviceEntry/' + itemId,
                                     type: 'PATCH',
@@ -48,6 +51,22 @@
                                         var result = body;
                                     }
                                 });
+                            }
+                        });
+                    }
+                    if (ihep != "" && dk != "") {
+                        var updateEntry = { ServiceAvailable: isServiceAvailable, IoTHubEndpoint: ihep, DeviceKey: dk };
+                        $.ajax({
+                            url: './tables/DeviceEntry/' + itemId,
+                            type: 'PATCH',
+                            headers: {
+                                'Content-Type': 'application/json',
+                                'ZUMO-API-VERSION': '2.0.0'
+                            },
+                            data: JSON.stringify(updateEntry),
+                            dataType: 'json',
+                            success: function (body) {
+                                var result = body;
                             }
                         });
                     }
@@ -74,7 +93,8 @@
                 .append($('<div>').append('<label class="di-text">IoT Hub Endpoint:</lablel>')
                 .append($('<input type="text" class="di-text">').attr('id', 'item-ihep-' + item.deviceId).attr('value', item.iotHubEndpoint)))
                 .append($('<div>').append('<label>Device Key:</lablel>')
-                .append($('<input type="text" class="di-text">').attr('id', 'item-dk-' + item.deviceId).attr('value', item.deviceKey)));
+                .append($('<input type="text" class="di-text">').attr('id', 'item-dk-' + item.deviceId).attr('value', item.deviceKey))
+                .append($('<input type="text" class="di-text">').attr('id', 'item-rwk-' + item.deviceId).attr('value', item.readWriteKey)));
 
         });
         $('#device-entries').empty().append(listItems).toggle(listItems.length > 0);
@@ -85,6 +105,7 @@
             if (elSA.checked) {
                 var elIHEP = document.getElementById('item-ihep-' + deviceId);
                 var elDK = document.getElementById('item-dk-' + deviceId);
+                var elRWK = document.getElementById('item-rwk-' + deviceId);
                 if (elIHEP.value === "" && elDK.value === "") {
                     $.ajax({
                         url: '/api/DeviceManagement',
@@ -95,6 +116,7 @@
                         success: function (body) {
                             elIHEP.value = body.IoTHubEndpoint;
                             elDK.value = body.DeviceKey;
+                            elRWK.value = body.ReadWriteKey;
                         }
                     });
                 }

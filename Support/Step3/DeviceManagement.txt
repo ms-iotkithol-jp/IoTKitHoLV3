@@ -14,6 +14,13 @@
             try
             {
                 var deviceId = this.Request.Headers.GetValues("device-id").ElementAt(0);
+                var iotHubEndpointH = this.Request.Headers.GetValues("iothub-endpoint").ElementAt(0);
+                var rwKeyH = this.Request.Headers.GetValues("readwrite-key").ElementAt(0);
+                if ((!string.IsNullOrEmpty(iotHubEndpointH)) && (!string.IsNullOrEmpty(rwKeyH)))
+                {
+                    IoTHubEndpoint = iotHubEndpointH;
+                    RegistryRWKey = rwKeyH;
+                }
                 string IoTHubConnectionString = "HostName=" + IoTHubEndpoint + ";SharedAccessKeyName=registryReadWrite;SharedAccessKey=" + RegistryRWKey;
                 var registryManager = Microsoft.Azure.Devices.RegistryManager.CreateFromConnectionString(IoTHubConnectionString);
                 await registryManager.OpenAsync();
@@ -32,6 +39,10 @@
                         dr.IoTHubEndpoint = IoTHubEndpoint;
                     }
                     dr.HasRegisted = true;
+                    if (!string.IsNullOrEmpty(rwKeyH))
+                    {
+                        dr.ReadWriteKey = rwKeyH;
+                    }
                 }
                 catch (Exception ex)
                 {
@@ -55,5 +66,6 @@
         public bool HasRegisted { get; set; }
         public string IoTHubEndpoint { get; set; }
         public string DeviceKey { get; set; }
+        public string ReadWriteKey { get; set; }
         public string Status { get; set; }
     }
