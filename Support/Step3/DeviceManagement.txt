@@ -1,3 +1,4 @@
+    using System.Diagnostics;
     using System.Threading.Tasks;
     public class DeviceManagementController : ApiController
     {
@@ -14,8 +15,18 @@
             try
             {
                 var deviceId = this.Request.Headers.GetValues("device-id").ElementAt(0);
-                var iotHubEndpointH = this.Request.Headers.GetValues("iothub-endpoint").ElementAt(0);
-                var rwKeyH = this.Request.Headers.GetValues("readwrite-key").ElementAt(0);
+                IEnumerable<string> iheps = null;
+                string iotHubEndpointH = "";
+                if (this.Request.Headers.TryGetValues("iothub-endpoint", out iheps))
+                {
+                    iotHubEndpointH = iheps.ElementAt(0);
+                }
+                IEnumerable<string> rwKeys = null;
+                string rwKeyH = "";
+                if (this.Request.Headers.TryGetValues("readwrite-key",out rwKeys))
+                {
+                    rwKeyH = rwKeys.ElementAt(0);
+                }
                 if ((!string.IsNullOrEmpty(iotHubEndpointH)) && (!string.IsNullOrEmpty(rwKeyH)))
                 {
                     IoTHubEndpoint = iotHubEndpointH;
@@ -59,8 +70,8 @@
             }
             return dr;
         }
-
     }
+
     public class DeviceRegistration
     {
         public bool HasRegisted { get; set; }

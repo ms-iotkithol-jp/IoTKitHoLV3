@@ -20,7 +20,11 @@ namespace WinIoTCoreTIIoTHubApp
 {
     public partial class MainPage
     {
+#if (ACCESS_MOBILE_SERVICE)
+        bool IoTServiceAvailabled = false;
+#else
         bool IoTServiceAvailabled = true;
+#endif
         TISensorTagLibrary.SensorTag sensorTag = TISensorTagLibrary.SensorTag.CC2541;
 
         async Task<bool> TryConnect()
@@ -138,7 +142,7 @@ namespace WinIoTCoreTIIoTHubApp
 #endif
         }
 
-#if(ACCESS_IOT_HUB)
+#if (ACCESS_IOT_HUB)
         async Task ReceiveCommands()
         {
             Debug.WriteLine("\nDevice waiting for commands from IoTHub...\n");
