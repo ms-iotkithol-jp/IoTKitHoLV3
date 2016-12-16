@@ -9,6 +9,7 @@
 #include <stdlib.h>
 #include <time.h>
 #include <sys/time.h>
+#include <unistd.h>
 
 /* This sample uses the _LL APIs of iothub_client for example purposes.
 That does not mean that HTTP only works with the _LL APIs.
