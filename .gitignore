@@ -45,3 +45,14 @@ $RECYCLE.BIN/
 Network Trash Folder
 Temporary Items
 .apdisk
+linux_sample/iotkithol_sample_http/windows/iothub_client_sample_http.sln
+WinIoTCoreTIIoTHubApp/WinIoTCoreTIIoTHubApp/obj/x86/Debug/App.g.cs
+WinIoTCoreTIIoTHubApp/WinIoTCoreTIIoTHubApp/obj/x86/Debug/App.g.i.cs
+WinIoTCoreTIIoTHubApp/WinIoTCoreTIIoTHubApp/obj/x86/Debug/DesignTimeResolveAssemblyReferencesInput.cache
+WinIoTCoreTIIoTHubApp/WinIoTCoreTIIoTHubApp/obj/x86/Debug/MainPage.g.cs
+WinIoTCoreTIIoTHubApp/WinIoTCoreTIIoTHubApp/obj/x86/Debug/TemporaryGeneratedFile_E7A71F73-0F8D-4B9B-B56E-8E70B10BC5D3.cs
+WinIoTCoreTIIoTHubApp/WinIoTCoreTIIoTHubApp/obj/x86/Debug/XamlTypeInfo.g.cs
+WinIoTCoreTIIoTHubApp/WinIoTCoreTIIoTHubApp/project.lock.json
+WinIoTCoreTIIoTHubApp/WinIoTCoreTIIoTHubApp/obj/x86/Debug/MainPage.g.i.cs
+*.suo
+WpfEmuIoTHubApp/.vs/WpfEmuIoTHubApp/v14/.suo

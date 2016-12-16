@@ -54,7 +54,7 @@
                             }
                         });
                     }
-                    if (ihep != "" && dk != "") {
+                    else if (ihep != "" && dk != "") {
                         var updateEntry = { ServiceAvailable: isServiceAvailable, IoTHubEndpoint: ihep, DeviceKey: dk };
                         $.ajax({
                             url: './tables/DeviceEntry/' + itemId,
@@ -93,7 +93,8 @@
                 .append($('<div>').append('<label class="di-text">IoT Hub Endpoint:</lablel>')
                 .append($('<input type="text" class="di-text">').attr('id', 'item-ihep-' + item.deviceId).attr('value', item.iotHubEndpoint)))
                 .append($('<div>').append('<label>Device Key:</lablel>')
-                .append($('<input type="text" class="di-text">').attr('id', 'item-dk-' + item.deviceId).attr('value', item.deviceKey))
+                .append($('<input type="text" class="di-text">').attr('id', 'item-dk-' + item.deviceId).attr('value', item.deviceKey)))
+                .append($('<div>').append('<label>Read Write Key(for other IoT Hub):</lablel>')
                 .append($('<input type="text" class="di-text">').attr('id', 'item-rwk-' + item.deviceId).attr('value', item.readWriteKey)));
 
         });
@@ -136,5 +137,4 @@
     function getDEItemDevId(formElement) {
         return $(formElement).closest('li').attr('data-deitem-device-id');
     }
-
 });

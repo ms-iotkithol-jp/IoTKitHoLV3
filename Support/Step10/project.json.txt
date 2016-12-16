@@ -2,8 +2,8 @@
 	"frameworks":{
 		"net46":{
 			"dependencies":{
-				"Newtonsoft.Json":"8.0.3",
-				"Microsoft.AspNet.SignalR.Client":"2.2.0"
+				"Newtonsoft.Json":"9.0.1",
+				"Microsoft.AspNet.SignalR.Client":"2.2.1"
 			}
 		}
 	}
