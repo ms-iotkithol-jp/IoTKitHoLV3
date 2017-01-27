@@ -18,4 +18,7 @@ or
 > cd cmake/iotsdk_linux/iothub_client/samples/raspbberrypi_photoupload  
 > ./raspbberrypi_photoupload
 
-Please see <https://doc.co/mtf3bT/NsXXfD> and <http://aka.ms/IoTKitHoLV3On>
+Please see <https://doc.co/mtf3bT/NsXXfD> and <http://aka.ms/IoTKitHoLV3On> 
+
+About iotkithol_iothub_dm please refere iotkithol_iothub_dm/readme.md 
+
