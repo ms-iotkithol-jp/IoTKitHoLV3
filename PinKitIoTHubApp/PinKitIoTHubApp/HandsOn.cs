@@ -104,11 +104,9 @@ namespace PinKitIoTHubApp
 #if (USE_LIGHTSENSE)
                                 + ",\"brightness\":" + sensorReadings[i].Brightness
 #endif
-                                + ",\"time\":\"" + measuredTime
-                                + "\",\"msgId\":\"" + sensorReadings[i].deviceId + (sensorReadings[i].time.Ticks / TimeSpan.TicksPerMillisecond)
-                                + "\",\"Latitude\":" + sensorReadings[i].Latitude
-                                + ",\"Longitude\":" + sensorReadings[i].Longitude
-                                + ",\"deviceId\":\"" + sensorReadings[i].deviceId + "\"}";
+                                + ",\"time\":\"" + measuredTime +"\""
+                                + ",\"Latitude\":" + sensorReadings[i].Latitude
+                                + ",\"Longitude\":" + sensorReadings[i].Longitude + "}";
                             if (content != "")
                             {
                                 content += ",";
@@ -180,15 +178,13 @@ namespace PinKitIoTHubApp
                     sensorReadings[srCount].accelx = accel.X;
                     sensorReadings[srCount].accely = accel.Y;
                     sensorReadings[srCount].accelz = accel.Z;
-                    sensorReadings[srCount].deviceId = this.deviceId;
-                    sensorReadings[srCount].msgId = deviceId.ToString() + now.ToString("yyyyMMddHHmmssfff");
                     sensorReadings[srCount].time = now;
                     sensorReadings[srCount].Latitude = IoTHoLConfig.Latitude;
                     sensorReadings[srCount].Longitude = IoTHoLConfig.Longitude;
 #if (USE_LIGHTSENSE)
                     sensorReadings[srCount].Brightness = pinkit.LightSensor.TakeMeasurement();
 #endif
-                    Debug.Print("Measured[" + sendRound + "][" + srCount + "].msgId=" + sensorReadings[srCount].msgId);
+                    Debug.Print("Measured[" + sendRound + "][" + srCount + "].temp=" + sensorReadings[srCount].temp);
                     srCount++;
                 }
             }

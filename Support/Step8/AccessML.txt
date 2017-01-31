@@ -1,5 +1,6 @@
 WITH subquery AS (  
-        SELECT deviceid, time, accelx, accely, accelz, msgId, 
+        SELECT IoTHub.ConnectionDeviceId as deviceId, CONCAT(IoTHub.ConnectionDeviceId, CAST(time as nvarchar(max))) as msgId,
+        time, accelx, accely, accelz,  
         prediction(accelx, accely, accelz,deviceId, time) as result from sensor  
     )
 SELECT deviceId, time, accelx, accely, accelz, msgId,

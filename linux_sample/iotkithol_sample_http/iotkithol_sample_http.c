@@ -204,8 +204,7 @@ static gboolean on_timer_upload(gpointer user_data)
 	local = localtime(&now);
 
 	// modifiy here when you want to send more sensors
-	sprintf(msgText, "{\"deviceId\":\"%s\",\"msgId\":\"%s%04d%02d%02d%02d%02d%02d\",\"time\":\"%s\",\"accelx\":%f,\"accely\":%f,\"accelz\":%f,\"temp\":%f",
-		deviceId, deviceId,
+	sprintf(msgText, "{\"time\":\"%s\",\"accelx\":%f,\"accely\":%f,\"accelz\":%f,\"temp\":%f",
 		local->tm_year + 1900, local->tm_mon + 1, local->tm_mday, local->tm_hour, local->tm_min, local->tm_sec,
 		currentTime, lastAccelX, lastAccelY, lastAccelZ, lastTemperature);
 	SendMessageToIoTHub(context->iotHubClientHandle, msgText);

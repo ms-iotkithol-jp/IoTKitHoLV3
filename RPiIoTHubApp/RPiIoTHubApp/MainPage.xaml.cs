@@ -133,13 +133,9 @@ namespace RPiIoTHubApp
         {
 #if (ACCESS_IOT_HUB)
             var now = DateTime.Now;
-            var sensorReading = new Models.SensorReading()
-            {
-                msgId = deviceId.ToString() + now.ToString("yyyyMMddHHmmssfff")
-            };
+            var sensorReading = new Models.SensorReading();
             lock (this)
             {
-                sensorReading.deviceId = deviceId.ToString();
                 sensorReading.temp = lastTemperature;
                 sensorReading.accelx = lastAccelX;
                 sensorReading.accely = lastAccelY;

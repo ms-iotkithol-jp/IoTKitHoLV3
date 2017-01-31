@@ -61,6 +61,8 @@ namespace RPi2FHIoTHubApp
                 {
                     await InitializeUpload();
                 }
+                geolocator = new Windows.Devices.Geolocation.Geolocator();
+                geolocator.PositionChanged += Geolocator_PositionChanged;
             }
             catch (Exception ex)
             {
@@ -108,6 +110,16 @@ namespace RPi2FHIoTHubApp
                     deviceId = hn.DisplayName;
                     break;
                 }
+            }
+        }
+
+        Windows.Devices.Geolocation.Geolocator geolocator;
+        private void Geolocator_PositionChanged(Windows.Devices.Geolocation.Geolocator sender, Windows.Devices.Geolocation.PositionChangedEventArgs args)
+        {
+            if (sender.LocationStatus == Windows.Devices.Geolocation.PositionStatus.Ready)
+            {
+                MSIoTKiTHoLJP.IoTHoLConfig.Latitude = args.Position.Coordinate.Point.Position.Latitude;
+                MSIoTKiTHoLJP.IoTHoLConfig.Longitude = args.Position.Coordinate.Point.Position.Longitude;
             }
         }
 

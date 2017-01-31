@@ -11,10 +11,6 @@ namespace WinIoTCoreTIIoTHubApp.Models
 
     public class SensorReading
     {
-        /// <summary>
-        /// Device Id
-        /// </summary>
-        public string deviceId { get; set; }
 #if false
         public List<SensorValue> SensorValues { get; set; }
 #else
@@ -42,7 +38,6 @@ namespace WinIoTCoreTIIoTHubApp.Models
         /// Measured Time
         /// </summary>
         public DateTime time { get; set; }
-        public string msgId { get; set; }
 
         public double Latitude { get; set; }
         public double Longitude { get; set; }

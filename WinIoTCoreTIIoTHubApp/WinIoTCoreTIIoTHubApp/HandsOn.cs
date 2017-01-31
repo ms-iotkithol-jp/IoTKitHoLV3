@@ -209,11 +209,9 @@ namespace WinIoTCoreTIIoTHubApp
                 {
                     var sensorReading = new Models.SensorReading()
                     {
-                        msgId = deviceId.ToString() + currentReadings[count].Timestamp.ToString("yyyyMMddHHmmssfff"),
                         accelx = currentReadings[count].AccelX,
                         accely = currentReadings[count].AccelY,
                         accelz = currentReadings[count].AccelZ,
-                        deviceId = deviceId.ToString(),
                         temp = currentReadings[count].Temperature,
                         time = currentReadings[count].Timestamp,
                         Longitude = MSIoTKiTHoLJP.IoTHoLConfig.Longitude,
