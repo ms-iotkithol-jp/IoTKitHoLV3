@@ -128,12 +128,14 @@ namespace WpfEmuIoTHubApp
         string iotHubConnectionString = "";
 
 #endif
-        void SetupIoTHub()
+        async void SetupIoTHub()
         {
 #if (ACCESS_IOT_HUB)
             iotHubConnectionString = "HostName=" + IoTHoLConfig.IoTHubEndpoint + ";DeviceId=" +IoTHoLConfig.deviceId + ";SharedAccessKey=" + IoTHoLConfig.DeviceKey;
             try {
                 deviceClient = DeviceClient.CreateFromConnectionString(iotHubConnectionString, Microsoft.Azure.Devices.Client.TransportType.Amqp);
+                await deviceClient.OpenAsync();
+                ReceiveCommands();
                 Debug.Write("IoT Hub Connected.");
             }
             catch(Exception ex)

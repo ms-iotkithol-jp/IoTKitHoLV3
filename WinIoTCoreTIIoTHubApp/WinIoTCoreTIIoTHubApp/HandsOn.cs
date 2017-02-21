@@ -125,13 +125,14 @@ namespace WinIoTCoreTIIoTHubApp
         DeviceClient deviceClient;
         string iotHubConnectionString = "";
 #endif
-        private void SetupIoTHub()
+        private async void SetupIoTHub()
         {
 #if (ACCESS_IOT_HUB)
             iotHubConnectionString = "HostName=" + MSIoTKiTHoLJP.IoTHoLConfig.IoTHubEndpoint + ";DeviceId=" + deviceId + ";SharedAccessKey=" + MSIoTKiTHoLJP.IoTHoLConfig.DeviceKey;
             try
             {
-                deviceClient = DeviceClient.CreateFromConnectionString(iotHubConnectionString, Microsoft.Azure.Devices.Client.TransportType.Http1);
+                deviceClient = DeviceClient.CreateFromConnectionString(iotHubConnectionString, Microsoft.Azure.Devices.Client.TransportType.Http1);                await deviceClient.OpenAsync();
+                await deviceClient.OpenAsync();
                 Debug.Write("IoT Hub Connected.");
                 ReceiveCommands();
             }
