@@ -1,2 +1,0 @@
-http://github.com/azure/azure-iot-sdks
-Microsoft.Azure.Devices.Client.Http.NetMF_43.dll

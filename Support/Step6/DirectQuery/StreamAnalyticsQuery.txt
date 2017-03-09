@@ -1,3 +1,0 @@
--- Create output bind to SQL Database as 'PBIEOutput' alias
-SELECT deviceId, msgId,time, accelx,accely, accelz, temp, longitude, latitude
-INTO PBIEOutput FROM sensor
