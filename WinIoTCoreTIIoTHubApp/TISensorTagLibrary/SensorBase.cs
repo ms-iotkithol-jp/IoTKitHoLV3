@@ -9,6 +9,8 @@ using Windows.Devices.Bluetooth.GenericAttributeProfile;
 using Windows.Devices.Enumeration;
 using Windows.Storage.Streams;
 
+using System.Diagnostics;
+
 namespace TISensorTagLibrary
 {
     public abstract class SensorBase : IDisposable
@@ -22,6 +24,7 @@ namespace TISensorTagLibrary
         private string sensorConfigUuid;
         private string sensorDataUuid;
 
+        private GattCharacteristic configCharacteristic;
         private GattCharacteristic dataCharacteristic;
 
         private SensorName sensorName;
@@ -66,7 +69,19 @@ namespace TISensorTagLibrary
         public async Task< bool> Initialize(string serviceUuid)
         {
             string selector = GattDeviceService.GetDeviceSelectorFromUuid(new Guid(serviceUuid));
+
+            Debug.WriteLine("*SensorBase::Initialize: enter, uuid=" + serviceUuid);
+
             var devices = await DeviceInformation.FindAllAsync(selector, new string[] { "System.Devices.ContainerId" });
+
+            Debug.WriteLine("*SensorBase::Initialize: devices.Count=" + devices.Count);
+
+            if (devices.Count == 0)
+            {
+                Debug.WriteLine("*SensorBase::Initialize: Count 0 return");
+                return false;
+            }
+
             var deviceInfo = devices[0];
             if (deviceInfo != null)
             {
@@ -75,10 +90,16 @@ namespace TISensorTagLibrary
                     Clean();
                 }
 
-
                 this.deviceService = await GattDeviceService.FromIdAsync(deviceInfo.Id);
                 if (this.deviceService == null)
+                {
+                    Debug.WriteLine("*SensorBase::Initialize: error");
                     return false;
+                }
+                else
+                {
+                    Debug.WriteLine("*SensorBase::Initialize: ok");
+                }
                 return true;
             }
             return false;
@@ -102,7 +123,10 @@ namespace TISensorTagLibrary
 
             GattCommunicationStatus status = await configCharacteristic.WriteValueAsync((new byte[] { 0 }).AsBuffer());
             if (status == GattCommunicationStatus.Unreachable)
-                throw new ArgumentOutOfRangeException();
+            {
+                //throw new ArgumentOutOfRangeException();
+                Debug.WriteLine("*DisableSensor: Status.Unreachable!");
+            }
         }
 
         public virtual async Task EnableNotifications()
@@ -117,7 +141,8 @@ namespace TISensorTagLibrary
                     GattClientCharacteristicConfigurationDescriptorValue.Notify);
             if (status == GattCommunicationStatus.Unreachable)
             {
-                throw new ArgumentOutOfRangeException();
+                //throw new ArgumentOutOfRangeException();
+                Debug.WriteLine("*EnableNotifications: Status.Unreachable!");
             }
         }
 
@@ -133,7 +158,8 @@ namespace TISensorTagLibrary
 
             if (status == GattCommunicationStatus.Unreachable)
             {
-                throw new ArgumentOutOfRangeException();
+                //throw new ArgumentOutOfRangeException();
+                Debug.WriteLine("*DisableNotifications: Status.Unreachable!");
             }
         }
 
@@ -143,15 +169,40 @@ namespace TISensorTagLibrary
                 dataCharacteristic = deviceService.GetCharacteristics(new Guid(sensorDataUuid))[0];
 
             GattReadResult readResult = await dataCharacteristic.ReadValueAsync(BluetoothCacheMode.Uncached);
-
             if (readResult.Status == GattCommunicationStatus.Unreachable)
-                throw new ArgumentOutOfRangeException();
-
+            {
+                //throw new ArgumentOutOfRangeException();
+                Debug.WriteLine("*ReadValue: Status.Unreachable!");
+            }
             var sensorData = new byte[readResult.Value.Length];
 
             DataReader.FromBuffer(readResult.Value).ReadBytes(sensorData);
 
             return sensorData;
+        }
+
+        public async Task WriteValue(byte[] data)
+        {
+            if (dataCharacteristic == null)
+                configCharacteristic = deviceService.GetCharacteristics(new Guid(SensorConfigUuid))[0];
+
+            var status = await configCharacteristic.WriteValueAsync((new byte[] { 1 }).AsBuffer());
+            if (status == GattCommunicationStatus.Unreachable)
+            {
+                //throw new ArgumentOutOfRangeException();
+                Debug.WriteLine("*ReadValue: Status.Unreachable!");
+            }
+
+            if (dataCharacteristic == null)
+                dataCharacteristic = deviceService.GetCharacteristics(new Guid(sensorDataUuid))[0];
+
+            Debug.WriteLine("*WriteValue: enter data=" + data[0].ToString() + "," + sensorDataUuid);
+            status = await dataCharacteristic.WriteValueAsync(data.AsBuffer());
+            if (status == GattCommunicationStatus.Unreachable)
+            {
+                //throw new ArgumentOutOfRangeException();
+                Debug.WriteLine("*ReadValue: Status.Unreachable!");
+            }
         }
 
         public void Dispose()
@@ -162,11 +213,18 @@ namespace TISensorTagLibrary
 
         protected async Task EnableSensor(byte[] sensorEnableData)
         {
-            GattCharacteristic configCharacteristic = deviceService.GetCharacteristics(new Guid(sensorConfigUuid))[0];
+            configCharacteristic = deviceService.GetCharacteristics(new Guid(sensorConfigUuid))[0];
 
+            Debug.WriteLine("*EnableSensor: enter=" + sensorConfigUuid);
             var status = await configCharacteristic.WriteValueAsync(sensorEnableData.AsBuffer());
             if (status == GattCommunicationStatus.Unreachable)
-                throw new ArgumentOutOfRangeException();
+            {
+                //throw new ArgumentOutOfRangeException();
+                Debug.WriteLine("*EnableSensor: Status.Unreachable!");
+                //await Task.Delay(TimeSpan.FromMilliseconds(100));
+            }
+
+            Debug.WriteLine("*EnableSensor: ok");
         }
 
         protected virtual void Dispose(bool disposing)
@@ -184,6 +242,8 @@ namespace TISensorTagLibrary
 
         private async Task<GattDeviceService> getDeviceService()
         {
+            Debug.WriteLine("*getDeviceService: enter=" + sensorServiceUuid);
+
             string selector = GattDeviceService.GetDeviceSelectorFromUuid(new Guid(sensorServiceUuid));
             var devices = await DeviceInformation.FindAllAsync(selector);
             DeviceInformation di = devices.FirstOrDefault();
