@@ -4,11 +4,6 @@
 #include <stdio.h>
 #include <stdlib.h>
 
-/* This sample uses the _LL APIs of iothub_client for example purposes.
-That does not mean that HTTP only works with the _LL APIs.
-Simply changing the using the convenience layer (functions not having _LL)
-and removing calls to _DoWork will yield the same results. */
-
 #include <sys/signalfd.h>
 #include <unistd.h>
 #include <signal.h>
@@ -19,7 +14,7 @@ and removing calls to _DoWork will yield the same results. */
 #ifdef ARDUINO
 #include "AzureIoT.h"
 #else
-#include "iothub_client_ll.h"
+#include "iothub_client.h"
 #include "iothub_message.h"
 #include "azure_c_shared_utility/threadapi.h"
 #include "azure_c_shared_utility/crt_abstractions.h"
@@ -60,7 +55,7 @@ typedef struct EVENT_INSTANCE_TAG
 } EVENT_INSTANCE;
 
 typedef struct IoTKitHoLContext_tag {
-	IOTHUB_CLIENT_LL_HANDLE iotHubClientHandle;
+	IOTHUB_CLIENT_HANDLE iotHubClientHandle;
 	void* messageLoop;
 } IoTKitHoLContext;
 
@@ -128,7 +123,7 @@ static void SendConfirmationCallback(IOTHUB_CLIENT_CONFIRMATION_RESULT result, v
 }
 
 static size_t iterator = 0;
-void SendMessageToIoTHub(IOTHUB_CLIENT_LL_HANDLE iotHubClientHandle, const unsigned char* msg)
+void SendMessageToIoTHub(IOTHUB_CLIENT_HANDLE iotHubClientHandle, const unsigned char* msg)
 {
 	EVENT_INSTANCE* eventinstance = (EVENT_INSTANCE*)malloc(sizeof(EVENT_INSTANCE));
 	if ((eventinstance->messageHandle = IoTHubMessage_CreateFromByteArray(msg, strlen(msg))) == NULL)
@@ -148,18 +143,16 @@ void SendMessageToIoTHub(IOTHUB_CLIENT_LL_HANDLE iotHubClientHandle, const unsig
 			(void)printf("ERROR: Map_AddOrUpdate Failed!\r\n");
 		}
 
-		if (IoTHubClient_LL_SendEventAsync(iotHubClientHandle, eventinstance->messageHandle, SendConfirmationCallback, eventinstance) != IOTHUB_CLIENT_OK)
+		if (IoTHubClient_SendEventAsync(iotHubClientHandle, eventinstance->messageHandle, SendConfirmationCallback, eventinstance) != IOTHUB_CLIENT_OK)
 		{
-			(void)printf("ERROR: IoTHubClient_LL_SendEventAsync..........FAILED!\r\n");
+			(void)printf("ERROR: IoTHubClient_SendEventAsync..........FAILED!\r\n");
 		}
 		else
 		{
-			(void)printf("IoTHubClient_LL_SendEventAsync accepted message [%zu] for transmission to IoT Hub.\r\n", iterator);
+			(void)printf("IoTHubClient_SendEventAsync accepted message [%zu] for transmission to IoT Hub.\r\n", iterator);
 		}
 		iterator++;
 	}
-	IoTHubClient_LL_DoWork(iotHubClientHandle);
-	ThreadAPI_Sleep(0);
 }
 
 double averageAccelX = 0.0;
@@ -239,7 +232,7 @@ void start_timers(IoTKitHoLContext* context)
 void iotkithol_sample_http_http_run(void* messageLoop)
 {
 	IoTKitHoLContext iotKitHoLContext;
-	IOTHUB_CLIENT_LL_HANDLE iotHubClientHandle;
+	IOTHUB_CLIENT_HANDLE iotHubClientHandle;
 
 	iotKitHoLContext.messageLoop = messageLoop;
 
@@ -260,7 +253,7 @@ void iotkithol_sample_http_http_run(void* messageLoop)
 	{
 		(void)printf("Starting the IoTHub client sample HTTP - %s\r\n", connectionString);
 
-		if ((iotHubClientHandle = IoTHubClient_LL_CreateFromConnectionString(connectionString, HTTP_Protocol)) == NULL)
+		if ((iotHubClientHandle = IoTHubClient_CreateFromConnectionString(connectionString, HTTP_Protocol)) == NULL)
 		{
 			(void)printf("ERROR: iotHubClientHandle is NULL!\r\n");
 		}
@@ -274,32 +267,32 @@ void iotkithol_sample_http_http_run(void* messageLoop)
 			// is 25 minutes. For more information, see:
 			// https://azure.microsoft.com/documentation/articles/iot-hub-devguide/#messaging
 			unsigned int minimumPollingTime = 9;
-			if (IoTHubClient_LL_SetOption(iotHubClientHandle, "timeout", &timeout) != IOTHUB_CLIENT_OK)
+			if (IoTHubClient_SetOption(iotHubClientHandle, "timeout", &timeout) != IOTHUB_CLIENT_OK)
 			{
 				printf("failure to set option \"timeout\"\r\n");
 			}
 
-			if (IoTHubClient_LL_SetOption(iotHubClientHandle, "MinimumPollingTime", &minimumPollingTime) != IOTHUB_CLIENT_OK)
+			if (IoTHubClient_SetOption(iotHubClientHandle, "MinimumPollingTime", &minimumPollingTime) != IOTHUB_CLIENT_OK)
 			{
 				printf("failure to set option \"MinimumPollingTime\"\r\n");
 			}
 
 #ifdef MBED_BUILD_TIMESTAMP
 			// For mbed add the certificate information
-			if (IoTHubClient_LL_SetOption(iotHubClientHandle, "TrustedCerts", certificates) != IOTHUB_CLIENT_OK)
+			if (IoTHubClient_SetOption(iotHubClientHandle, "TrustedCerts", certificates) != IOTHUB_CLIENT_OK)
 			{
 				printf("failure to set option \"TrustedCerts\"\r\n");
 			}
 #endif // MBED_BUILD_TIMESTAMP
 
 			/* Setting Message call back, so we can receive Commands. */
-			if (IoTHubClient_LL_SetMessageCallback(iotHubClientHandle, ReceiveMessageCallback, &receiveContext) != IOTHUB_CLIENT_OK)
+			if (IoTHubClient_SetMessageCallback(iotHubClientHandle, ReceiveMessageCallback, &receiveContext) != IOTHUB_CLIENT_OK)
 			{
-				(void)printf("ERROR: IoTHubClient_LL_SetMessageCallback..........FAILED!\r\n");
+				(void)printf("ERROR: IoTHubClient_SetMessageCallback..........FAILED!\r\n");
 			}
 			else
 			{
-				(void)printf("IoTHubClient_LL_SetMessageCallback...successful.\r\n");
+				(void)printf("IoTHubClient_SetMessageCallback...successful.\r\n");
 
 				start_timers(&iotKitHoLContext);
 			}
@@ -307,7 +300,7 @@ void iotkithol_sample_http_http_run(void* messageLoop)
 			// run the glib loop
 			g_main_loop_run(messageLoop);
 
-			IoTHubClient_LL_Destroy(iotHubClientHandle);
+			IoTHubClient_Destroy(iotHubClientHandle);
 		}
 		platform_deinit();
 	}
