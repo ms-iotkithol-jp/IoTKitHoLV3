@@ -25,13 +25,17 @@
 #include "certs.h"
 #endif // MBED_BUILD_TIMESTAMP
 
+typedef struct IoTKitHoLContext_tag {
+	IOTHUB_CLIENT_HANDLE iotHubClientHandle;
+	void* messageLoop;
+} IoTKitHoLContext;
+
 /*String containing Hostname, Device Id & Device Key in the format:                         */
 /*  "HostName=<host_name>;DeviceId=<device_id>;SharedAccessKey=<device_key>"                */
-/*  "HostName=EGPhotoTriggerIotHub.azure-devices.net;DeviceId=egrpi3;SharedAccessSignature=k2j5/qzPzl+It+f7PdfDHBKoZb456CC4DlogEBPbtqM="    */
 //static const char* connectionString = "<<device connection string>>";
 //static const char* deviceId = "<<device_id>>";
-static const char* connectionString = "HostName=EGPhotoTriggerIotHub.azure-devices.net;DeviceId=egrpi3;SharedAccessKey=k2j5/qzPzl+It+f7PdfDHBKoZb456CC4DlogEBPbtqM=";
-static const char* deviceId = "egrpi3";
+static const char* connectionString = "<< IoT Hub Connection String >>";
+static const char* deviceId = "<< Device Id >>";
 int duration = 60;
 
 const unsigned char* take_photo(long* contentLength)
@@ -64,9 +68,18 @@ const unsigned char* take_photo(long* contentLength)
 	return buffer;
 }
 
-void raspberrypi_photoupload_run(void)
+void UploadCallback(IOTHUB_CLIENT_FILE_UPLOAD_RESULT result, void* userContext)
 {
+	printf("Upload status - %d\r\n", result);
+}
+
+void raspberrypi_photoupload_run(void* messageLoop)
+{
+	IoTKitHoLContext iotKitHoLContext;
 	IOTHUB_CLIENT_HANDLE iotHubClientHandle;
+
+	iotKitHoLContext.messageLoop = messageLoop;
+
 	time_t now;
 	struct tm *local;
 	char* photoFileName;
@@ -87,6 +100,7 @@ void raspberrypi_photoupload_run(void)
 		}
 		else
 		{
+			iotKitHoLContext.iotHubClientHandle = iotHubClientHandle;
 			printf("Connected to IoT Hub\r\n");
 			while (true) {
 				photoContent = take_photo(&contentLength);
@@ -97,7 +111,7 @@ void raspberrypi_photoupload_run(void)
 					photoFileName = (char*)malloc(strlen(deviceId) + 32);
 					sprintf(photoFileName, "%s_%04d_%02d_%02d_%02d_%02d_%02d_Pro.jpg", deviceId, local->tm_year+1900, local->tm_mon+1, local->tm_mday, local->tm_hour, local->tm_min, local->tm_sec);
 					printf("Try to upload as %s size is %d\r\n", photoFileName, contentLength);
-					if (IoTHubClient_UploadToBlob(iotHubClientHandle, photoFileName, photoContent, contentLength) != IOTHUB_CLIENT_OK)
+					if (IoTHubClient_UploadToBlobAsync(iotHubClientHandle, photoFileName, photoContent, contentLength, UploadCallback, iotKitHolContext) != IOTHUB_CLIENT_OK)
 					{
 						printf("Failed to upload picture\r\n");
 					}
