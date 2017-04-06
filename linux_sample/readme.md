@@ -1,4 +1,18 @@
-Copy iotkithol_sample_http and raspbberrypi_photoupload into Azure IoT SDK's iothub_client/samples directory  
+# Azure IoT SDK additional sample 
+Sample apps run on Raspbian(it may run other Linux OS) 
+- iotkithol_sample_http   - This app sends emulated acceleration and temperature at regular interval and can receive command from IoT Hub 
+- iotkithol_sample_dm     - This app is device side sample of IoT Hub DM capability 
+- raspberrypi_photoupLoad - Upload photo taken by Web Cam to storage blob via IoT Hub 
+
+## Setup 
+Follow this [link](https://github.com/Azure/azure-iot-gateway-sdk/blob/master/doc/devbox_setup.md#set-up-a-linux-development-environment) to set up the development environment and [Azure IoT SDK](http://github.com/Azure/azure-iot-sdk-c) 
+After apt-get install and before github repository clone, please execute following additional library. 
+
+sudo apt-get install libglib1.0-dev 
+
+※ In the case of 
+
+Copy iotkithol_sample_http, iotkithol_sample_dm and raspbberrypi_photoupload into Azure IoT SDK's iothub_client/samples directory  
 Add add_CMakeList.txt descriptions at bottom of iothub_client/samples/CMakeList.txt  
 
 Edit  
