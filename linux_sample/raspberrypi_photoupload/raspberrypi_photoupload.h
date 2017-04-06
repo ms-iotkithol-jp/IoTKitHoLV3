@@ -8,7 +8,7 @@
 extern "C" {
 #endif
 
-    void raspberrypi_photoupload_run(void);
+    void raspberrypi_photoupload_run(void*);
 
 #ifdef __cplusplus
 }

@@ -5,5 +5,5 @@
 
 int main(void)
 {
-    raspberrypi_photoupload_run();
+    raspberrypi_photoupload_run((void*)0);
 }

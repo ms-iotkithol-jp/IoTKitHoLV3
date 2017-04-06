@@ -111,7 +111,7 @@ void raspberrypi_photoupload_run(void* messageLoop)
 					photoFileName = (char*)malloc(strlen(deviceId) + 32);
 					sprintf(photoFileName, "%s_%04d_%02d_%02d_%02d_%02d_%02d_Pro.jpg", deviceId, local->tm_year+1900, local->tm_mon+1, local->tm_mday, local->tm_hour, local->tm_min, local->tm_sec);
 					printf("Try to upload as %s size is %d\r\n", photoFileName, contentLength);
-					if (IoTHubClient_UploadToBlobAsync(iotHubClientHandle, photoFileName, photoContent, contentLength, UploadCallback, iotKitHolContext) != IOTHUB_CLIENT_OK)
+					if (IoTHubClient_UploadToBlobAsync(iotHubClientHandle, photoFileName, photoContent, contentLength, UploadCallback, &iotKitHoLContext) != IOTHUB_CLIENT_OK)
 					{
 						printf("Failed to upload picture\r\n");
 					}
