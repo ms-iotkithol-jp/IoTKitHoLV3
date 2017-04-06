@@ -11,15 +11,10 @@
 #include <sys/time.h>
 #include <unistd.h>
 
-/* This sample uses the _LL APIs of iothub_client for example purposes.
-That does not mean that HTTP only works with the _LL APIs.
-Simply changing the using the convenience layer (functions not having _LL)
-and removing calls to _DoWork will yield the same results. */
-
 #ifdef ARDUINO
 #include "AzureIoT.h"
 #else
-#include "iothub_client_ll.h"
+#include "iothub_client.h"
 #include "iothub_message.h"
 #include "azure_c_shared_utility/crt_abstractions.h"
 #include "iothubtransporthttp.h"
@@ -71,7 +66,7 @@ const unsigned char* take_photo(long* contentLength)
 
 void raspberrypi_photoupload_run(void)
 {
-	IOTHUB_CLIENT_LL_HANDLE iotHubClientHandle;
+	IOTHUB_CLIENT_HANDLE iotHubClientHandle;
 	time_t now;
 	struct tm *local;
 	char* photoFileName;
@@ -86,7 +81,7 @@ void raspberrypi_photoupload_run(void)
 	{
 		(void)printf("Starting the IoTHub client sample upload to blob...\r\n");
 
-		if ((iotHubClientHandle = IoTHubClient_LL_CreateFromConnectionString(connectionString, HTTP_Protocol)) == NULL)
+		if ((iotHubClientHandle = IoTHubClient_CreateFromConnectionString(connectionString, HTTP_Protocol)) == NULL)
 		{
 			(void)printf("ERROR: iotHubClientHandle is NULL!\r\n");
 		}
@@ -102,7 +97,7 @@ void raspberrypi_photoupload_run(void)
 					photoFileName = (char*)malloc(strlen(deviceId) + 32);
 					sprintf(photoFileName, "%s_%04d_%02d_%02d_%02d_%02d_%02d_Pro.jpg", deviceId, local->tm_year+1900, local->tm_mon+1, local->tm_mday, local->tm_hour, local->tm_min, local->tm_sec);
 					printf("Try to upload as %s size is %d\r\n", photoFileName, contentLength);
-					if (IoTHubClient_LL_UploadToBlob(iotHubClientHandle, photoFileName, photoContent, contentLength) != IOTHUB_CLIENT_OK)
+					if (IoTHubClient_UploadToBlob(iotHubClientHandle, photoFileName, photoContent, contentLength) != IOTHUB_CLIENT_OK)
 					{
 						printf("Failed to upload picture\r\n");
 					}
@@ -118,7 +113,7 @@ void raspberrypi_photoupload_run(void)
 				}
 				sleep(duration);
 			}
-			IoTHubClient_LL_Destroy(iotHubClientHandle);
+			IoTHubClient_Destroy(iotHubClientHandle);
 		}
 		platform_deinit();
 	}
