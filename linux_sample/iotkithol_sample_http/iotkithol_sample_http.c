@@ -123,10 +123,10 @@ static void SendConfirmationCallback(IOTHUB_CLIENT_CONFIRMATION_RESULT result, v
 }
 
 static size_t iterator = 0;
-void SendMessageToIoTHub(IOTHUB_CLIENT_HANDLE iotHubClientHandle, const unsigned char* msg)
+void SendMessageToIoTHub(IOTHUB_CLIENT_HANDLE iotHubClientHandle, const unsigned char* msg, int msgLen)
 {
 	EVENT_INSTANCE* eventinstance = (EVENT_INSTANCE*)malloc(sizeof(EVENT_INSTANCE));
-	if ((eventinstance->messageHandle = IoTHubMessage_CreateFromByteArray(msg, strlen(msg))) == NULL)
+	if ((eventinstance->messageHandle = IoTHubMessage_CreateFromByteArray(msg, msgLen)) == NULL)
 	{
 		(void)printf("ERROR: iotHubMessageHandle is NULL!\r\n");
 	}
@@ -197,10 +197,9 @@ static gboolean on_timer_upload(gpointer user_data)
 	local = localtime(&now);
 
 	// modifiy here when you want to send more sensors
-	sprintf(msgText, "{\"time\":\"%s\",\"accelx\":%f,\"accely\":%f,\"accelz\":%f,\"temp\":%f",
-		local->tm_year + 1900, local->tm_mon + 1, local->tm_mday, local->tm_hour, local->tm_min, local->tm_sec,
+	sprintf(msgText, "{\"time\":\"%s\",\"accelx\":%f,\"accely\":%f,\"accelz\":%f,\"temp\":%f}",
 		currentTime, lastAccelX, lastAccelY, lastAccelZ, lastTemperature);
-	SendMessageToIoTHub(context->iotHubClientHandle, msgText);
+	SendMessageToIoTHub(context->iotHubClientHandle, msgText, strlen(msgText));
 
 	return TRUE;
 }
