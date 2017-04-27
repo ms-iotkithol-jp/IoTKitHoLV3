@@ -36,6 +36,7 @@ namespace WpfEmuIoTHubApp
 
         bool TryConnect()
         {
+            Debug.WriteLine("Device Id:"+IoTHoLConfig.deviceId.ToString());
             bool result = false;
             var request = HttpWebRequest.Create("http://egholservice.azurewebsites.net/api/DeviceConnect") as HttpWebRequest;
             request.Headers.Add("device-id", IoTHoLConfig.deviceId.ToString());
