@@ -64,6 +64,9 @@ namespace TISensorTagLibrary.CC2650
         public const string UUID_IO_DATA  = "f000aa65-0451-4000-b000-000000000000"; //only for CC2650
         public const string UUID_IO_CONF  = "f000aa66-0451-4000-b000-000000000000"; //only for CC2650
 
+        public const string UUID_BAT_SERV = "0000180f-0000-1000-8000-00805f9b34fb"; // Service
+        public const string UUID_BAT_LEVL = "00002a19-0000-1000-8000-00805f9b34fb"; // Battery Level Service
+
         public const string UUID_KEY_SERV = "0000ffe0-0000-1000-8000-00805f9b34fb";
         public const string UUID_KEY_DATA = "0000ffe1-0000-1000-8000-00805f9b34fb";
     }

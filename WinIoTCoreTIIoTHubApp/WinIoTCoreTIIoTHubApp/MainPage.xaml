@@ -25,6 +25,9 @@
             <TextBlock Text="with TI Sensor" FontSize="20" HorizontalAlignment="Left" VerticalAlignment="Bottom" Margin="10"/>
             <TextBlock Text="Send Status" Grid.Column="0" x:Name="tbSendStatus" Grid.Row="2"  VerticalAlignment="Top" FontSize="20"/>
             <TextBlock Text="Receive status" Grid.Column="0" x:Name="tbReceiveStats" Grid.Row="3"  VerticalAlignment="Top" FontSize="20"/>
+            <Button x:Name="buttonRed" Content="Red" HorizontalAlignment="Left" Height="26" Margin="180,154,0,0" Grid.Row="3" VerticalAlignment="Top" Width="60" Click="buttonRed_Click"  FontSize="12"/>
+            <Button x:Name="buttonGreen" Content="Green" HorizontalAlignment="Left" Height="26" Margin="250,154,0,0" Grid.Row="3" VerticalAlignment="Top" Width="60" Click="buttonGreen_Click" FontSize="12"/>
+            <Button x:Name="buttonBuzzer" Content="Buzzer" HorizontalAlignment="Left" Height="26" Margin="320,154,0,0" Grid.Row="3" VerticalAlignment="Top" Width="60" Click="buttonBuzzer_Click"  FontSize="12"/>
         </Grid>
         <Grid Grid.Column="1">
             <Grid.RowDefinitions>

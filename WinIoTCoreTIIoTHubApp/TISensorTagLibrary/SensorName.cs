@@ -22,6 +22,7 @@ namespace TISensorTagLibrary
         TemperatureSensor,
         Magnetometer,
         PressureSensor,
+        BatteryLevel,
         SimpleKeyService,
         IOSerivice
     }

@@ -282,6 +282,7 @@ namespace WinIoTCoreTIIoTHubApp
                         accelz = currentReadings[count].AccelZ,
                         gyrox = currentReadings[count].GyroX,
                         magx = currentReadings[count].MagX,
+                        batt = currentReadings[count].Battery,
                         lkey = currentReadings[count].LeftKey,
                         rkey = currentReadings[count].RightKey,
                         time = currentReadings[count].Timestamp,

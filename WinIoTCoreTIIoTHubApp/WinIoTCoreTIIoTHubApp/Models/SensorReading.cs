@@ -31,6 +31,7 @@ namespace WinIoTCoreTIIoTHubApp.Models
         public float magx { get; set; }
         public float magy { get; set; }
         public float magz { get; set; }
+        public float batt { get; set; }
         public bool lkey { get; set; }
         public bool rkey { get; set; }
 

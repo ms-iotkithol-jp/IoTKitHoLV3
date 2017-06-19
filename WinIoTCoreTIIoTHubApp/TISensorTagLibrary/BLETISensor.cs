@@ -67,7 +67,6 @@ namespace TISensorTagLibrary
 
             sensor.deviceNameValue = await ReadDeviceNameAsync(selector);
             sensor.systemIdValue = await ReadDeviceIdAsync(selector);
-
             return sensor;
         }
 
@@ -208,6 +207,7 @@ namespace TISensorTagLibrary
                 data.OTemperature = lastSensorReading.OTemperature;
                 data.Pressure = lastSensorReading.Pressure;
                 data.Humidity = lastSensorReading.Humidity;
+                data.BatteryLevel = lastSensorReading.BatteryLevel;
                 data.Lightness = lastSensorReading.Lightness;
                 data.LeftKey = lastSensorReading.LeftKey;
                 data.RightKey = lastSensorReading.RightKey;
@@ -235,6 +235,7 @@ namespace TISensorTagLibrary
             public double Pressure { get; set; }
             public double Humidity { get; set; }
             public double Lightness { get; set; }
+            public double BatteryLevel { get; set; }
             public bool LeftKey { get; set; }
             public bool RightKey { get; set; }
         }

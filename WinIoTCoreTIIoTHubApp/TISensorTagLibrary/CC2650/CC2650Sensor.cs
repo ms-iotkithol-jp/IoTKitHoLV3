@@ -18,6 +18,7 @@ namespace TISensorTagLibrary.CC2650
         private LightSensor light;
         private PressureSensor pressure;
         private IRTemperatureSensor temperature;
+        private BatteryLevel battery;
         private SimpleKeyService key;
         private IOService io;
 
@@ -29,6 +30,8 @@ namespace TISensorTagLibrary.CC2650
             light = new LightSensor();
             pressure = new PressureSensor();
             temperature = new IRTemperatureSensor();
+            battery = new BatteryLevel();
+
             key = new SimpleKeyService();
             io = new IOService();
 
@@ -37,6 +40,7 @@ namespace TISensorTagLibrary.CC2650
             light.SensorValueChanged += CC2650Sensor_SensorValueChanged;
             pressure.SensorValueChanged += CC2650Sensor_SensorValueChanged;
             temperature.SensorValueChanged += CC2650Sensor_SensorValueChanged;
+            battery.SensorValueChanged += CC2650Sensor_SensorValueChanged;
             key.SensorValueChanged += CC2650Sensor_SensorValueChanged;
         }
 
@@ -111,6 +115,18 @@ namespace TISensorTagLibrary.CC2650
                     Debug.WriteLine("Simple Key doesn't exists");
                 }
 
+                if (await battery.Initialize(battery.SensorServiceUuid))
+                {
+                    battery.Setup();
+                    byte[] bytes = await BatteryLevel.GetLevel();
+                    double bl = BatteryLevel.CalculateBatteryInPercent(bytes);
+                    Debug.WriteLine("Battery Level Service enabled=" + (int) bl);
+                }
+                else
+                {
+                    Debug.WriteLine("Battery Level doesn't exists");
+                }
+
                 if (await io.Initialize(io.SensorServiceUuid))
                 {
                     await io.EnableSensor();
@@ -131,7 +147,7 @@ namespace TISensorTagLibrary.CC2650
 
         public override void WriteValue(byte [] data)
         {
-            io.WriteValue(data);
+            Task.Run(() => io.WriteValue(data));
         }
 
         private void CC2650Sensor_SensorValueChanged(object sender, SensorValueChangedEventArgs e)
@@ -169,6 +185,19 @@ namespace TISensorTagLibrary.CC2650
                     {
                         lastSensorReading.Lightness = rl;
                     }
+
+                    //Special service for Battery here!
+                    Task<byte[]> task = Task.Run(() => BatteryLevel.GetLevel());
+                    byte[] bytes = task.Result;
+                    if (bytes != null)
+                    {
+                        double bl = BatteryLevel.CalculateBatteryInPercent(bytes);
+                        //Debug.WriteLine("Battery Level:" + (int) bl);
+                        lock (lastSensorReading)
+                        {
+                            lastSensorReading.BatteryLevel = bl;
+                        }
+                    }
                     break;
                 case SensorName.PressureSensor:
                     double hp = (PressureSensor.CalculatePressure(e.RawData));
@@ -178,6 +207,9 @@ namespace TISensorTagLibrary.CC2650
                         lastSensorReading.Pressure = hp;
                         lastSensorReading.PTemperature = ht;
                     }
+                    break;
+                case SensorName.BatteryLevel:
+                    Debug.WriteLine("Battery Level Service is not here.");
                     break;
                 case SensorName.SimpleKeyService:
                     bool leftKey = false;
@@ -433,6 +465,72 @@ namespace TISensorTagLibrary.CC2650
                 return otemprate;
             else
                 return otemprate * 1.8 + 32;
+        }
+    }
+
+    public class BatteryLevel : SensorBase
+    {
+        private static GattCharacteristic BatteryLevelCharacteristic = null;
+        public BatteryLevel()
+            : base(SensorName.BatteryLevel, SensorTagUuid.UUID_BAT_SERV, "", SensorTagUuid.UUID_BAT_LEVL)
+        {
+
+        }
+
+        public void Setup()
+        {
+            var CharacteristicList = deviceService.GetCharacteristics(new Guid(SensorDataUuid));
+            BatteryLevelCharacteristic = null;
+            if (CharacteristicList != null)
+            {
+                if (CharacteristicList.Count() > 0)
+                {
+                    BatteryLevelCharacteristic = CharacteristicList[0];
+                    Debug.WriteLine("BatterySetup: List[0].Uuid=" + BatteryLevelCharacteristic.Uuid);
+                }
+                Debug.WriteLine("BatterySetup: List.Count=" + CharacteristicList.Count());
+            }
+            else
+            {
+                Debug.WriteLine("BatterySetup: CharacteristicList is null");
+            }
+        }
+        public static async Task<byte[]> GetLevel()
+        {
+            byte[] bytes = null;
+            GattReadResult result;
+            GattCharacteristicProperties flag = GattCharacteristicProperties.Read;
+
+            if (BatteryLevelCharacteristic != null)
+            {
+                if (BatteryLevelCharacteristic.CharacteristicProperties.HasFlag(flag))
+                {
+                    result = await BatteryLevelCharacteristic.ReadValueAsync(Windows.Devices.Bluetooth.BluetoothCacheMode.Uncached);
+                    if (result.Status == GattCommunicationStatus.Success)
+                    {
+                        bytes = new byte[result.Value.Length];
+                        Windows.Storage.Streams.DataReader.FromBuffer(result.Value).ReadBytes(bytes);
+                    }
+                }
+            }
+            if (bytes != null)
+            {
+                ; // Debug.WriteLine("Battery Level: {0}", bytes[0]);
+            }
+            return bytes;
+        }
+
+        public static double CalculateBatteryInPercent(byte[] sensorData)
+        {
+            uint rawData = 0;
+            if (sensorData != null)
+            {
+                if (sensorData.Count() > 0)
+                {
+                    rawData = sensorData[0];
+                }
+            }
+            return rawData;
         }
     }
 

@@ -7,6 +7,7 @@ using System.Net;
 using System.Runtime.InteropServices.WindowsRuntime;
 using Windows.Foundation;
 using Windows.Foundation.Collections;
+using Windows.UI;
 using Windows.UI.Xaml;
 using Windows.UI.Xaml.Controls;
 using Windows.UI.Xaml.Controls.Primitives;
@@ -52,7 +53,7 @@ namespace WinIoTCoreTIIoTHubApp
                 deviceId = MSIoTKiTHoLJP.IoTHoLConfig.DeviceID.ToString();
             }
             //tbDeviceId.Text = deviceId.ToString();
-            tbSensorStatus.Text = deviceId.ToString();
+            tbSensorStatus.Text = deviceId.ToString() + (running ? " Running" : " Stopped");
             try
             {
                 var result = await TryConnect();
@@ -116,7 +117,7 @@ namespace WinIoTCoreTIIoTHubApp
             }
             else
             {
-                // Sensors are still not ready.
+                //Sensors are still not ready.
                 return;
             }
             if (sensor.systemIdValue != null && sensor.systemIdValue.Value != null)
@@ -153,6 +154,7 @@ namespace WinIoTCoreTIIoTHubApp
                         MagX = sensorReading.MagX,
                         MagY = sensorReading.MagY,
                         MagZ = sensorReading.MagZ,
+                        Battery = (float) sensorReading.BatteryLevel,
                         ATemperature = (float) sensorReading.ATemperature,
                         Humidity = (float) sensorReading.Humidity,
                         Light = (float) sensorReading.Lightness,
@@ -176,6 +178,11 @@ namespace WinIoTCoreTIIoTHubApp
                 tbPress.Text = (tPress = sensorReading.Pressure.ToString("F")) + " hPa";
                 tbTemp.Text = "Amb=" + (tATemp = sensorReading.ATemperature.ToString("F")) + " ℃ ";
                 tbTemp.Text += ",Obj=" + (tOTemp = sensorReading.OTemperature.ToString("F")) + " ℃";
+
+                tbSensorStatus.Text = deviceId.ToString()
+                    + " Battery:" + sensorReading.BatteryLevel.ToString("F0") + "%"
+                    + (running ? " Running" : " Stopped");
+
                 tbSwitch.Text = "Left=" + sensorReading.LeftKey + ",Right=" + sensorReading.RightKey;
             }
             Debug.WriteLine("[" + timestamp.ToString("yyyyMMdd-hhmmss.fff") + "]T="
@@ -183,7 +190,9 @@ namespace WinIoTCoreTIIoTHubApp
                 + ",H=" + tHum
                 + ",L=" + tLight
                 + "," + tbAccel.Text
-                + "," + tbSwitch.Text);
+                + "," + tbSwitch.Text
+                + ",B=" + sensorReading.BatteryLevel.ToString("F0") + "%"
+                );
 
             //ledToggle = !ledToggle;
             //sensor.WriteValue(new byte[] { (byte) (ledToggle ? 3 : 0) });
@@ -220,9 +229,76 @@ namespace WinIoTCoreTIIoTHubApp
             public float MagX { get; set; }
             public float MagY { get; set; }
             public float MagZ { get; set; }
+            public float Battery { get; set; }
             public bool LeftKey { get; set; }
             public bool RightKey { get; set; }
             public DateTime Timestamp { get; set; }
+        }
+
+        bool ledRed;
+        bool ledGreen;
+        bool buzzer;
+
+        Windows.UI.Xaml.Media.Brush ledRedDefault;
+        Windows.UI.Xaml.Media.Brush ledGreenDefault;
+        Windows.UI.Xaml.Media.Brush buzzerDefault;
+
+        byte ioStatus;    // Current Status
+        byte bitmask = 0; // Work bit
+
+        private void buttonRed_Click(object sender, RoutedEventArgs e)
+        {
+            bitmask = 0x01;
+            ledRed = !ledRed;
+            if (ledRed)
+            {
+                ledRedDefault = buttonRed.Background;
+                buttonRed.Background = new SolidColorBrush(Colors.Pink);
+                ioStatus |= bitmask;
+            }
+            else
+            {
+                buttonRed.Background = ledRedDefault;
+                ioStatus &= (byte) ~bitmask;
+            }
+            sensor.WriteValue(new byte[] { ioStatus &= 0x07 });
+        }
+
+        private void buttonGreen_Click(object sender, RoutedEventArgs e)
+        {
+            bitmask = 0x02;
+            ledGreen = !ledGreen;
+            if (ledGreen)
+            {
+                ledGreenDefault = buttonGreen.Background;
+                buttonGreen.Background = new SolidColorBrush(Colors.YellowGreen);
+                ioStatus |= bitmask;
+            }
+            else
+            {
+                buttonGreen.Background = ledGreenDefault;
+                ioStatus &= (byte)~bitmask;
+            }
+            sensor.WriteValue(new byte[] { ioStatus &= 0x07 });
+        }
+
+        private void buttonBuzzer_Click(object sender, RoutedEventArgs e)
+        {
+            bitmask = 0x04;
+            buzzer = !buzzer;
+            ledGreen = !ledGreen;
+            if (ledGreen)
+            {
+                buzzerDefault = buttonBuzzer.Background;
+                buttonBuzzer.Background = new SolidColorBrush(Colors.Yellow);
+                ioStatus |= bitmask;
+            }
+            else
+            {
+                buttonBuzzer.Background = buzzerDefault;
+                ioStatus &= (byte)~bitmask;
+            }
+            sensor.WriteValue(new byte[] { ioStatus &= 0x07 });
         }
     }
 
