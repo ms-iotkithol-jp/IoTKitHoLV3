@@ -1,0 +1,11 @@
+# please add this description at bottom of sampels\Makefile.txt
+if(${use_http})
+	add_sample_directory(iotkithol_sample_http)
+	add_sample_directory(iotkithol_sample_dm)
+    if(NOT ${dont_use_uploadtoblob})
+        add_sample_directory(raspberrypi_photoupload)
+    endif()
+endif()
+if(${use_amqp})
+	add_sample_directory(iotkithol_sample_amqp)
+endif()

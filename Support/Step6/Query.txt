@@ -1,0 +1,3 @@
+-- IoTHub.ConnectionDeviceId is added by IoT Hub
+SELECT IoTHub.ConnectionDeviceId as deviceId,
+* INTO PBSOutput FROM sensor  TIMESTAMP BY time;
