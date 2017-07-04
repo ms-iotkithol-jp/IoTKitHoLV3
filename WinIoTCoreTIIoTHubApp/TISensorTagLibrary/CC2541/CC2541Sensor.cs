@@ -36,38 +36,72 @@ namespace TISensorTagLibrary.CC2541
 
         public override async void Initialize()
         {
+            Debug.WriteLine("*CC2541Sensor::Initialize: enter");
             try
             {
-                await accelerometer.Initialize(accelerometer.SensorServiceUuid);
-                await accelerometer.EnableSensor();
-                await accelerometer.EnableNotifications();
-                Debug.WriteLine("Accelerometer enabled");
+                if (await accelerometer.Initialize(accelerometer.SensorServiceUuid))
+                {
+                    await accelerometer.EnableSensor();
+                    await accelerometer.EnableNotifications();
+                    Debug.WriteLine("Accelerometer enabled");
+                }
+                else
+                {
+                    Debug.WriteLine("accelerometer doesn't exists");
+                }
 
-                await humidity.Initialize(humidity.SensorServiceUuid);
-                await humidity.EnableSensor();
-                await humidity.EnableNotifications();
-                Debug.WriteLine("Humidity enabled");
+                if (await humidity.Initialize(humidity.SensorServiceUuid))
+                {
+                    await humidity.EnableSensor();
+                    await humidity.EnableNotifications();
+                    Debug.WriteLine("Humidity enabled");
+                }
+                else
+                {
+                    Debug.WriteLine("humidity doesn't exists");
+                }
 
-                await pressure.Initialize(pressure.SensorServiceUuid);
-                await pressure.EnableSensor();
-                await pressure.EnableNotifications();
-                Debug.WriteLine("Pressure enabled");
+                if (await pressure.Initialize(pressure.SensorServiceUuid))
+                {
+                    await pressure.EnableSensor();
+                    await pressure.EnableNotifications();
+                    Debug.WriteLine("Pressure enabled");
+                }
+                else
+                {
+                    Debug.WriteLine("pressure doesn't exists");
+                }
 
-                await temperature.Initialize(temperature.SensorServiceUuid);
-                await temperature.EnableSensor();
-                await temperature.EnableNotifications();
-                Debug.WriteLine("Temperature enabled");
+                if (await temperature.Initialize(temperature.SensorServiceUuid))
+                {
+                    await temperature.EnableSensor();
+                    await temperature.EnableNotifications();
+                    Debug.WriteLine("Temperature enabled");
+                }
+                else
+                {
+                    Debug.WriteLine("temperature doesn't exists");
+                }
 
-                await key.Initialize(key.SensorServiceUuid);
-                await key.EnableSensor();
-                await key.EnableNotifications();
-                Debug.WriteLine("Simple Key Service enabled");
+                if (await key.Initialize(key.SensorServiceUuid))
+                {
+                    await key.EnableSensor();
+                    await key.EnableNotifications();
+                    Debug.WriteLine("Simple Key Service enabled");
+                }
+                else
+                {
+                    Debug.WriteLine("Simple Key doesn't exists");
+                }
             }
             catch (Exception ex)
             {
                 Debug.WriteLine(ex.Message);
             }
+            Debug.WriteLine("*CC2541Sensor::Initialize: exit");
         }
+
+        public override void WriteValue(byte[] data) { }
 
         private void CC2541Sensor_SensorValueChanged(object sender, SensorValueChangedEventArgs e)
         {
@@ -77,9 +111,9 @@ namespace TISensorTagLibrary.CC2541
                     double[] accValues = Accelerometer.CalculateCoordinates(e.RawData, 1 / 64.0);
                     lock (lastSensorReading)
                     {
-                        lastSensorReading.AccelX = accValues[0];
-                        lastSensorReading.AccelY = accValues[1];
-                        lastSensorReading.AccelZ = accValues[2];
+                        lastSensorReading.AccelX = (float) accValues[0];
+                        lastSensorReading.AccelY = (float) accValues[1];
+                        lastSensorReading.AccelZ = (float) accValues[2];
                     }
                     break;
                 case SensorName.HumiditySensor:
@@ -100,11 +134,13 @@ namespace TISensorTagLibrary.CC2541
                     bool leftKey = false;
                     if (SimpleKeyService.LeftKeyHit(e.RawData))
                     {
+                        Debug.WriteLine("leftKey");
                         leftKey = true;
                     }
                     bool rightKey = false;
                     if (SimpleKeyService.RightKeyHit(e.RawData))
                     {
+                        Debug.WriteLine("rightKey");
                         rightKey = true;
                     }
                     lock (lastSensorReading)
@@ -229,26 +265,38 @@ namespace TISensorTagLibrary.CC2541
             byte[] confdata = new byte[] { 2 };
             var status = await tempConfig.WriteValueAsync(confdata.AsBuffer());
             if (status == GattCommunicationStatus.Unreachable)
-                throw new ArgumentOutOfRangeException();
+            {
+                //throw new ArgumentOutOfRangeException();
+                Debug.WriteLine("*StoreAndReadCalibrationValues: tempConfig.WriteValueAsync error");
+                return;
+            }
+            //GattCharacteristic calibrationCharacteristic = deviceService.GetCharacteristics(new Guid(SensorTagUuid.UUID_BAR_CALI))[0];
+            var calibrationCharacteristicList = deviceService.GetCharacteristics(new Guid(SensorTagUuid.UUID_BAR_CALI));
+            if (calibrationCharacteristicList != null && calibrationCharacteristicList.Count > 0)
+            {
+                GattCharacteristic calibrationCharacteristic = calibrationCharacteristicList[0];
 
-            GattCharacteristic calibrationCharacteristic = deviceService.GetCharacteristics(new Guid(SensorTagUuid.UUID_BAR_CALI))[0];
+                var res = await calibrationCharacteristic.ReadValueAsync(Windows.Devices.Bluetooth.BluetoothCacheMode.Uncached);
+                if (res.Status == GattCommunicationStatus.Unreachable)
+                    throw new ArgumentOutOfRangeException();
 
-            var res = await calibrationCharacteristic.ReadValueAsync(Windows.Devices.Bluetooth.BluetoothCacheMode.Uncached);
-            if (res.Status == GattCommunicationStatus.Unreachable)
-                throw new ArgumentOutOfRangeException();
+                var sdata = new byte[res.Value.Length];
 
-            var sdata = new byte[res.Value.Length];
+                DataReader.FromBuffer(res.Value).ReadBytes(sdata);
 
-            DataReader.FromBuffer(res.Value).ReadBytes(sdata);
-
-            calibrationData[0] = BitConverter.ToUInt16(sdata, 0);
-            calibrationData[1] = BitConverter.ToUInt16(sdata, 2);
-            calibrationData[2] = BitConverter.ToUInt16(sdata, 4);
-            calibrationData[3] = BitConverter.ToUInt16(sdata, 6);
-            calibrationData[4] = BitConverter.ToInt16(sdata, 8);
-            calibrationData[5] = BitConverter.ToInt16(sdata, 10);
-            calibrationData[6] = BitConverter.ToInt16(sdata, 12);
-            calibrationData[7] = BitConverter.ToInt16(sdata, 14);
+                calibrationData[0] = BitConverter.ToUInt16(sdata, 0);
+                calibrationData[1] = BitConverter.ToUInt16(sdata, 2);
+                calibrationData[2] = BitConverter.ToUInt16(sdata, 4);
+                calibrationData[3] = BitConverter.ToUInt16(sdata, 6);
+                calibrationData[4] = BitConverter.ToInt16(sdata, 8);
+                calibrationData[5] = BitConverter.ToInt16(sdata, 10);
+                calibrationData[6] = BitConverter.ToInt16(sdata, 12);
+                calibrationData[7] = BitConverter.ToInt16(sdata, 14);
+            }
+            else
+            {
+                Debug.WriteLine("*StoreAndReadCalibrationValues: GetCharacteristics error");
+            }
         }
     }
 

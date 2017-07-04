@@ -25,12 +25,18 @@ namespace WinIoTCoreTIIoTHubApp
 #else
         bool IoTServiceAvailabled = true;
 #endif
-        TISensorTagLibrary.SensorTag sensorTag = TISensorTagLibrary.SensorTag.CC2541;
+        //TISensorTagLibrary.SensorTag sensorTag = TISensorTagLibrary.SensorTag.CC2541;
+        TISensorTagLibrary.SensorTag sensorTag = TISensorTagLibrary.SensorTag.CC2650;
+        TISensorTagLibrary.AccelRange accelRange = TISensorTagLibrary.AccelRange._4G; // only for CC2650
+        TISensorTagLibrary.TemperatureScale tempScale = TISensorTagLibrary.TemperatureScale.Celsius;
 
         async Task<bool> TryConnect()
         {
             bool result = false;
             var client = new Windows.Web.Http.HttpClient();
+
+            Debug.WriteLine("*TryConnect: enter");
+
             client.DefaultRequestHeaders.Add("device-id", deviceId.ToString());
             client.DefaultRequestHeaders.Add("device-message", "Hello from RPi2");
             var response = client.GetAsync(new Uri("http://egholservice.azurewebsites.net/api/DeviceConnect"), Windows.Web.Http.HttpCompletionOption.ResponseContentRead);
@@ -125,14 +131,13 @@ namespace WinIoTCoreTIIoTHubApp
         DeviceClient deviceClient;
         string iotHubConnectionString = "";
 #endif
-        private async void SetupIoTHub()
+        private void SetupIoTHub()
         {
 #if (ACCESS_IOT_HUB)
             iotHubConnectionString = "HostName=" + MSIoTKiTHoLJP.IoTHoLConfig.IoTHubEndpoint + ";DeviceId=" + deviceId + ";SharedAccessKey=" + MSIoTKiTHoLJP.IoTHoLConfig.DeviceKey;
             try
             {
-                deviceClient = DeviceClient.CreateFromConnectionString(iotHubConnectionString, Microsoft.Azure.Devices.Client.TransportType.Http1);                await deviceClient.OpenAsync();
-                await deviceClient.OpenAsync();
+                deviceClient = DeviceClient.CreateFromConnectionString(iotHubConnectionString, Microsoft.Azure.Devices.Client.TransportType.Http1);
                 Debug.Write("IoT Hub Connected.");
                 ReceiveCommands();
             }
@@ -149,6 +154,8 @@ namespace WinIoTCoreTIIoTHubApp
             Debug.WriteLine("\nDevice waiting for commands from IoTHub...\n");
             Message receivedMessage;
             string messageData;
+            byte parameter = 0;
+            byte bitmask = 0;
 
             while (true)
             {
@@ -158,17 +165,69 @@ namespace WinIoTCoreTIIoTHubApp
 
                     if (receivedMessage != null)
                     {
+                        if (!running)
+                        {
+                            await Task.Delay(500);
+                            continue;
+                        }
+
                         messageData = Encoding.ASCII.GetString(receivedMessage.GetBytes());
                         Debug.WriteLine("\t{0}> Received message: {1}", DateTime.Now.ToLocalTime(), messageData);
                         tbReceiveStats.Text = "Received - " + messageData + " - @" + DateTime.Now.ToString();
                         var command = messageData.ToLower();
-                        if (command.StartsWith("fezhat:"))
+                        if (command.StartsWith("pi:"))
                         {
                             var units = command.Split(new char[] { ':' });
                             var unit = units[1].Split(new char[] { ',' });
                             foreach (var order in unit)
                             {
-                                // TODO: Add actions
+                                var frags = order.Split(new char[] { '=' });
+                                switch (frags[0].ToUpper())
+                                {
+                                    case "R":
+                                    case "RED":
+                                        bitmask = 1;
+                                        break;
+                                    case "G":
+                                    case "GREEN":
+                                        bitmask = 2;
+                                        break;
+                                    case "L":
+                                    case "LED":
+                                        bitmask = 3;
+                                        break;
+                                    case "B":
+                                    case "BUZZER":
+                                        bitmask = 4;
+                                        break;
+                                    case "A":
+                                    case "ALL":
+                                        bitmask = 7;
+                                        break;
+                                    default:
+                                        bitmask = 0;
+                                        parameter = 0;
+                                        break;
+                                }
+                                if (bitmask != 0)
+                                {
+                                    switch (frags[1].ToLower())
+                                    {
+                                        case "0":
+                                        case "n":
+                                        case "no":
+                                        case "off":
+                                        case "f":
+                                        case "false":
+                                            parameter &= (byte)~bitmask;
+                                            break;
+                                        default:
+                                            parameter |= bitmask;
+                                            break;
+                                    }
+                                }
+                                Debug.WriteLine("**ReceiveCommands=" + parameter);
+                                sensor.WriteValue(new byte[] { parameter &= 0x07 });
                             }
                         }
                         await deviceClient.CompleteAsync(receivedMessage);
@@ -195,7 +254,7 @@ namespace WinIoTCoreTIIoTHubApp
                         AccelX = r.AccelX,
                         AccelY = r.AccelY,
                         AccelZ = r.AccelZ,
-                        Temperature = r.Temperature,
+                        ATemperature = r.ATemperature,
                         Timestamp = r.Timestamp
                     });
                 }
@@ -210,10 +269,22 @@ namespace WinIoTCoreTIIoTHubApp
                 {
                     var sensorReading = new Models.SensorReading()
                     {
+                        temp = currentReadings[count].ATemperature,
+                        atemp = currentReadings[count].ATemperature,
+                        otemp = currentReadings[count].OTemperature,
+                        htemp = currentReadings[count].HTemperature,
+                        ptemp = currentReadings[count].PTemperature,
+                        hum = currentReadings[count].Humidity,
+                        light = currentReadings[count].Light,
+                        press = currentReadings[count].Pressure,
                         accelx = currentReadings[count].AccelX,
                         accely = currentReadings[count].AccelY,
                         accelz = currentReadings[count].AccelZ,
-                        temp = currentReadings[count].Temperature,
+                        gyrox = currentReadings[count].GyroX,
+                        magx = currentReadings[count].MagX,
+                        batt = currentReadings[count].Battery,
+                        lkey = currentReadings[count].LeftKey,
+                        rkey = currentReadings[count].RightKey,
                         time = currentReadings[count].Timestamp,
                         Longitude = MSIoTKiTHoLJP.IoTHoLConfig.Longitude,
                         Latitude = MSIoTKiTHoLJP.IoTHoLConfig.Latitude
@@ -225,7 +296,7 @@ namespace WinIoTCoreTIIoTHubApp
                 Debug.WriteLine("\t{0}> Sending message: {1}, Data: [{2}]", DateTime.Now.ToLocalTime(), currentReadings.Count, payload);
 
                 await deviceClient.SendEventAsync(eventMessage);
-                tbSendStatus.Text = "Send[" + sendCount++ + "]@" + DateTime.Now.ToString();
+                tbSendStatus.Text = deviceId.ToString() +  "\r\nSend[" + sendCount++ + "]@" + DateTime.Now.ToString();
             }
             catch (Exception ex)
             {
