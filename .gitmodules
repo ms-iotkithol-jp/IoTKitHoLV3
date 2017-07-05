@@ -1,0 +1,3 @@
+[submodule "WinIoTCoreTIIoTHubApp"]
+	path = WinIoTCoreTIIoTHubApp
+	url = https://github.com/ms-iotkithol-jp/WinIoTCoreTIIoTHubApp.git
